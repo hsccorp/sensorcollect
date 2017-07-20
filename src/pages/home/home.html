@@ -1,0 +1,28 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      Sensors
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <h3>Sampling @ {{freq}}ms</h3>
+  <p>log rows: {{logRows}}, currently logging:{{isLogging()}}</p>
+  <br/>
+  <h4>Acceleration:</h4> {{acc}}
+
+  <h4>Gyroscope:</h4> {{gyro}}
+
+
+
+  <br/><br/>
+  <button ion-button (click)="toggleLog()" [color]=stateColor>{{logState}} Logging</button>
+  <br/>
+  <button *ngIf='logState=="Start"' ion-button (click)="share()" color="secondary">Share</button>
+  <br/>
+  <button *ngIf='logs.length>0' ion-button (click)="clear()" color="dark">Clear</button>
+</ion-content>
+
+
+
