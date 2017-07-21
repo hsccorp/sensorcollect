@@ -14,3 +14,19 @@
 // To declare rules for a specific mode, create a child rule
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
+
+// global color defs for toast
+.successToast .toast-message  {
+    background-color: rgba(38, 194, 129,0.5);
+    color: white;
+}
+
+.errorToast .toast-message {
+    background-color: rgba(217,30,24,0.5);
+    color: white;
+}
+
+.small {
+    font-size:1.2rem;
+    color:grey;
+}

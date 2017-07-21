@@ -10,6 +10,11 @@ import { HomePage } from '../pages/home/home';
 import { DeviceMotion, DeviceMotionAccelerationData } from '@ionic-native/device-motion';
 import { Gyroscope, GyroscopeOrientation, GyroscopeOptions } from '@ionic-native/gyroscope';
 import { SocialSharing } from '@ionic-native/social-sharing';
+import { Insomnia } from '@ionic-native/insomnia';
+import { Geolocation } from '@ionic-native/geolocation';
+import { AndroidPermissions } from '@ionic-native/android-permissions';
+import { CommonUtilsProvider } from '../providers/common-utils/common-utils';
+import { File } from '@ionic-native/file';
 
 
 @NgModule({
@@ -32,6 +37,11 @@ import { SocialSharing } from '@ionic-native/social-sharing';
     DeviceMotion,
     Gyroscope,
     SocialSharing,
+    Insomnia,
+    Geolocation,
+    AndroidPermissions,
+    CommonUtilsProvider,
+    File,
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })

@@ -3,26 +3,58 @@
     <ion-title>
       Sensors
     </ion-title>
+    <ion-buttons end>
+      <button ion-button icon-only (click)="confirmDelete()">
+            <ion-icon name="trash"></ion-icon>
+         </button>
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
-<ion-content padding>
-  <h3>Sampling @ {{freq}}ms</h3>
-  <p>log rows: {{logRows}}, currently logging:{{isLogging()}}</p>
-  <br/>
-  <h4>Acceleration:</h4> {{acc}}
+<ion-content>
+  <h6>Sampling @ {{freq}}ms, logging:{{isLogging()}}</h6>
 
-  <h4>Gyroscope:</h4> {{gyro}}
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <button  ion-button (click)="toggleLog()" [color]=stateColor icon-left><ion-icon name="car"></ion-icon>{{logState}} Trip
+        </button>
+      </ion-col>
+      
+      <ion-col>
+        <button *ngIf='logState=="Start"' ion-button  icon-left (click)="share()" color="secondary"><ion-icon name="share"></ion-icon>Share</button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <div>
+    <ion-segment [(ngModel)]="viewMode">
+      <ion-segment-button value="graph" (ionSelect)="segmentClicked()">
+        graph
+      </ion-segment-button>
+      <ion-segment-button value="raw">
+        raw
+      </ion-segment-button>
+    </ion-segment>
+  </div>
+  <p>Acc:{{mAcc | number:'1.2-2' }}, Move:{{move}}, MoveCnt:{{moveCount}}, Speed:{{speed}}</p>
+  <div [ngSwitch]="viewMode">
+    <div *ngSwitchCase="'raw'">
+      <h4>Acceleration:</h4> {{acc}}
+      <h4>Gyroscope:</h4> {{gyro}}
+    </div>
+    <div *ngSwitchCase="'graph'">
+
+      <canvas #acc></canvas>
+      <canvas #gyro></canvas>
+
+
+    </div>
+  </div>
 
 
 
-  <br/><br/>
-  <button ion-button (click)="toggleLog()" [color]=stateColor>{{logState}} Logging</button>
-  <br/>
-  <button *ngIf='logState=="Start"' ion-button (click)="share()" color="secondary">Share</button>
-  <br/>
-  <button *ngIf='logs.length>0' ion-button (click)="clear()" color="dark">Clear</button>
+
+
+
 </ion-content>
-
-
-
