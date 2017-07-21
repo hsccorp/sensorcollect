@@ -46,19 +46,26 @@ export class CommonUtilsProvider {
   }
 
   initLog() {
+      this.file.checkFile(this.file.dataDirectory,this.logFile)
+      .then(succ=>{console.log("log file exists");})
+      .catch(_=>{console.log ("**CREATING LOG"); this.file.createFile(this.file.dataDirectory, this.logFile, true)});
   } 
 
   writeString(str) {
+      console.log (this.file.dataDirectory+" "+this.logFile+" "+ str);
     return this.file.writeFile(this.file.dataDirectory,this.logFile,str, {replace:false, append:true});
   }
 
   writeLog(logs_object) {
     // don't JSON stringify as these are chunks
+
     let str = "";
     for (let i=0; i < logs_object.length; i++) {
         str = str + "              "+JSON.stringify(logs_object[i])+","+"\n";
     }
+    
     return this.file.writeFile(this.file.dataDirectory,this.logFile,str,{replace:false, append:true});
+
   }
 
   logFileLocation() {
@@ -66,6 +73,7 @@ export class CommonUtilsProvider {
   }
 
   deleteLog() {
+     
       this.presentToast("clearing log file");
       return this.file.writeFile(this.file.dataDirectory,"triplog.txt","",{replace:true});
   }

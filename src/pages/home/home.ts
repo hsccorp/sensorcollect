@@ -54,6 +54,8 @@ export class HomePage {
 
     plt.ready().then(() => {
       //this.charts = {};
+      this.utils.initLog();
+
       this.createChart(this.charts, this.accCanvas.nativeElement, 'acc');
       this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro');
 
@@ -240,14 +242,19 @@ export class HomePage {
   flushLog() {
     console.log(">>>>>>>Flushing logs...");
     return this.utils.writeLog(this.logs);
-
   }
+
+
   isLogging(): boolean {
     return this.logState == 'Stop';
   }
 
   stopTrip() {
 
+    console.log ("Inside stop trip");
+
+    try {
+          
     this.flushLog().then(_ => {
       let str = "]},\n";
       console.log("STOPPING TRIP, writing " + str);
@@ -255,7 +262,9 @@ export class HomePage {
       this.clearArray();
       this.toggleButtonState();
       this.utils.presentToast("trip recording stopped");
-    });
+    }, (error)=>(console.log(error)));
+  }
+  catch (err) {console.log ("CATCH="+err);}
 
   }
 
@@ -265,7 +274,12 @@ export class HomePage {
     let str = "{\n    id:\"" + tname + "\",\n";
     str += "    sensors:[\n";
     console.log("STARTING TRIP, writing " + str);
-    this.utils.writeString(str);
+
+
+    this.utils.writeString(str)
+    .then (resp=>console.log("OK:"+resp))
+    .catch (e=> { "ERROR:"+e});
+  
   }
 
   toggleLog() {
