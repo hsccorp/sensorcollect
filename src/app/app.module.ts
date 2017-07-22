@@ -32,13 +32,13 @@ import { File } from '@ionic-native/file';
     HomePage
   ],
   providers: [
+    Geolocation,
     StatusBar,
     SplashScreen,
     DeviceMotion,
     Gyroscope,
     SocialSharing,
     Insomnia,
-    Geolocation,
     AndroidPermissions,
     CommonUtilsProvider,
     File,

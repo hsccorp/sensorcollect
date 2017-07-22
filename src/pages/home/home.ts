@@ -13,13 +13,12 @@ import { Insomnia } from '@ionic-native/insomnia';
 import { CommonUtilsProvider } from '../../providers/common-utils/common-utils';
 import { AlertController } from 'ionic-angular';
 
+var gps;
 
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
 })
-
-
 
 export class HomePage {
 
@@ -49,7 +48,8 @@ export class HomePage {
   speed: number = 0; // holds GPS speed if applicable
 
 
-  constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, public geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController) {
+
+  constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController) {
 
 
     plt.ready().then(() => {
@@ -71,29 +71,12 @@ export class HomePage {
 
         });
 
-      // latch on to gps 
-      var gps;
+    
       
       this.perm.checkPermission(this.perm.PERMISSION.ACCESS_FINE_LOCATION).then(
-        success => { latchGPS(); }, err => { this.utils.presentToast("Error latching to GPS", "error"); });
+        success => { this.latchGPS(); }, err => { this.utils.presentToast("Error latching to GPS", "error"); });
 
-      
-      function latchGPS() {
-        console.log (">>>>GPS Latching...");
-        gps = this.geo.watchPosition({ maximumAge: 3000, timeout: 5000, enableHighAccuracy: true });
-
-          gps.subscribe((data) => {
-            console.log("GPS:" + JSON.stringify(data));
-            if (data.coords) {
-              this.speed = data.coords.speed;
-              if (this.isLogging()) { this.storeLog('gps', JSON.stringify(data.coords)); }
-
-            }
-
-          })
-          .then (succ=>{console.log("** gps success");})
-          .catch (err=>{console.log ("** gps Error " + err);});
-      }
+    
 
       // make sure screen stays awake
       this.insomnia.keepAwake()
@@ -140,6 +123,21 @@ export class HomePage {
     alert.present();
 
   }
+
+  latchGPS() {
+        console.log (">>>>GPS Latching...");
+         gps = this.geo.watchPosition();
+
+          gps.subscribe((data) => {
+            console.log("GPS:" + JSON.stringify(data));
+            if (data.coords) {
+              this.speed = data.coords.speed;
+              if (this.isLogging()) { this.storeLog('gps', JSON.stringify(data.coords)); }
+
+            }
+
+          });
+      }
 
   // given a sensor object, updates graph and log 
   process(object, chart, type) {
@@ -281,13 +279,9 @@ export class HomePage {
   }
 
   startTripHeader(tname) {
-
-
     let str = "{\n    id:\"" + tname + "\",\n";
     str += "    sensors:[\n";
     console.log("STARTING TRIP, writing " + str);
-
-
     this.utils.writeString(str)
     .then (resp=>console.log("OK:"+resp))
     .catch (e=> { "ERROR:"+e});
@@ -312,8 +306,6 @@ export class HomePage {
   }
 
   confirmDelete() {
-
-
     let alert = this.alert.create({
       title: 'Confirm Deletion',
       message: 'This will permanently delete all stored trips',
@@ -339,8 +331,6 @@ export class HomePage {
   }
 
 
-
-
   segmentClicked() {
     console.log("SEGMENT CLICKED");
     this.dirty = true;
@@ -356,10 +346,7 @@ export class HomePage {
 
   createChart(charthandle, elem, type) {
     console.log("*** Creating Chart");
-
-
     let chart;
-
     chart = new Chart(elem, {
 
       type: 'line',
