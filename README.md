@@ -3,7 +3,10 @@ Gyr is better at detecting turns but as far as driver distraction goes, acc does
 
 In addition to collecting data, I'm also logging a simple heuristic of tracking acc's Z-axis. Assuming you move the phone forward when peeking, z-axis seems to be the best indication so far.
 
-<img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/sample.PNG" height="500px" />
+<img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/sample1.PNG" height="600px" />
+<img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/sample2.PNG" height="600px" />
+<img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/sample1.PNG" height="600px" />
+<img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/sample3.PNG" height="600px" />
 
 Known Issues
 ------------
