@@ -71,15 +71,18 @@ export class HomePage {
 
         });
 
-      // latch on to accelerometer 
+      // latch on to gps 
+      var gps;
+      
       this.perm.checkPermission(this.perm.PERMISSION.ACCESS_FINE_LOCATION).then(
         success => { latchGPS(); }, err => { this.utils.presentToast("Error latching to GPS", "error"); });
 
-      var gps;
+      
       function latchGPS() {
         console.log (">>>>GPS Latching...");
-        gps = this.geo.watchPosition()
-          .subscribe((data) => {
+        gps = this.geo.watchPosition({ maximumAge: 3000, timeout: 5000, enableHighAccuracy: true });
+
+          gps.subscribe((data) => {
             console.log("GPS:" + JSON.stringify(data));
             if (data.coords) {
               this.speed = data.coords.speed;
@@ -87,8 +90,9 @@ export class HomePage {
 
             }
 
-
-          });
+          })
+          .then (succ=>{console.log("** gps success");})
+          .catch (err=>{console.log ("** gps Error " + err);});
       }
 
       // make sure screen stays awake
@@ -211,6 +215,14 @@ export class HomePage {
   }
 
 
+  setMarker(str) {
+
+       if (this.isLogging()) { 
+         this.storeLog('Marker', str ); 
+         this.utils.presentToast(str+' market set','success',1500);
+        }
+
+  }
 
   // currently simply shares via email. No error checking, make sure email is associated
   // else error

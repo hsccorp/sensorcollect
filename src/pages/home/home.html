@@ -25,6 +25,29 @@
         <button *ngIf='logState=="Start"' ion-button  icon-left (click)="share()" color="secondary"><ion-icon name="share"></ion-icon>Share</button>
       </ion-col>
     </ion-row>
+    <ion-row wrap *ngIf='logState=="Stop"'>
+      <ion-col>
+        <button ion-button small color="light" (click)="setMarker('pick')">pick</button>
+      </ion-col>
+
+      <ion-col >
+        <button ion-button small color="light" (click)="setMarker('brake')">brake</button>
+      </ion-col>
+
+
+      <ion-col >
+        <button ion-button small color="light" (click)="setMarker('speedup')">speed up</button>
+      </ion-col>
+
+
+      <ion-col >
+        <button ion-button small color="light" (click)="setMarker('left')">left</button>
+      </ion-col>
+      
+      <ion-col >
+        <button ion-button small color="light" (click)="setMarker('right')">right</button>
+      </ion-col>
+    </ion-row>
   </ion-grid>
 
   <div>

@@ -89,7 +89,7 @@
     <plugin name="cordova-plugin-device-motion" spec="^1.2.5" />
     <plugin name="cordova-plugin-file" spec="^4.3.3" />
     <plugin name="cordova-plugin-geolocation" spec="^2.4.3">
-        <variable name="GEOLOCATION_USAGE_DESCRIPTION" value=" " />
+        <variable name="GEOLOCATION_USAGE_DESCRIPTION" value="for speed information" />
     </plugin>
     <plugin name="cordova-plugin-gyroscope" spec="^0.1.4" />
     <plugin name="cordova-plugin-insomnia" spec="^4.3.0" />
