@@ -26,6 +26,7 @@
     <preference name="AutoHideSplashScreen" value="false" />
     <preference name="iosPersistentFileLocation" value="Library" />
     <preference name="AndroidPersistentFileLocation" value="Internal" />
+    <preference name="SuppressesLongPressGesture" value="true" />
     <platform name="android">
         <allow-intent href="market:*" />
         <icon density="ldpi" src="resources/android/icon/drawable-ldpi-icon.png" />
