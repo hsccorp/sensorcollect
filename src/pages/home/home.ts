@@ -14,9 +14,9 @@ import { CommonUtilsProvider } from '../../providers/common-utils/common-utils';
 import { AlertController } from 'ionic-angular';
 
 // will hold subscriptions to sensors
-var gps: any = null;
-var acc: any = null;
-var gyr: any = null;
+var gpsSub: any = null;
+var accSub: any = null;
+var gyrSub: any = null;
 
 @Component({
   selector: 'page-home',
@@ -51,6 +51,7 @@ export class HomePage {
   moveCount: number = 0; // times you 'saw' the phone in a trip
   moveThreshold: number = 3; // tweak this for above sensitivity
   speed: number = 0; // holds GPS speed if applicable
+  timer = {'time':""};
 
 
   // init
@@ -68,15 +69,16 @@ export class HomePage {
   toggleButtonState() {
     this.logState = (this.logState == 'Start') ? 'Stop' : 'Start';
     this.stateColor = (this.logState == 'Start') ? 'primary' : 'danger';
+    console.log ("******* BUTTON IS NOW "+this.logState);
   }
 
   // unsubscribe from all sensors once trip ends
   stopAllSensors() {
     try {
-      acc.unsubscribe();
-      gyr.unsubscribe();
-      navigator.geolocation.clearWatch(gps);
-      gps.unsubscribe(); // not sure why this doesn't work
+      accSub.unsubscribe();
+      gyrSub.unsubscribe();
+      navigator.geolocation.clearWatch(gpsSub); // not sure why this is needed
+      gpsSub.unsubscribe(); 
     }
     catch (e) {
       console.log("stop sensor error: " + e);
@@ -87,12 +89,13 @@ export class HomePage {
   // start listening to sensors when trip starts
   startAllSensors() {
     // listen to acc. data
-    acc = this.deviceMotion.watchAcceleration({ frequency: this.freq }).subscribe((acceleration: DeviceMotionAccelerationData) => {
+    accSub = this.deviceMotion.watchAcceleration({ frequency: this.freq }).subscribe((acceleration: DeviceMotionAccelerationData) => {
+      console.log (">>>TIMER:"+this.timer.time);
       this.process(acceleration, this.charts.accChart, 'acc');
     });
 
     // listen to gyro data
-    gyr = this.gyroscope.watch({ frequency: this.freq })
+    gyrSub= this.gyroscope.watch({ frequency: this.freq })
       .subscribe((gyroscope: GyroscopeOrientation) => {
         console.log ("Gyro:"+JSON.stringify(gyroscope));
         this.process(gyroscope, this.charts.gyroChart, 'gyro');
@@ -108,9 +111,9 @@ export class HomePage {
   // attaches to the GPS and logs readings, for speeds
   latchGPS() {
     console.log(">>>>GPS Latching...");
-    gps = this.geo.watchPosition({enableHighAccuracy:true})
+    gpsSub = this.geo.watchPosition({enableHighAccuracy:true})
     .subscribe((data) => {
-      console.log("GPS:" + JSON.stringify(data));
+      //console.log("GPS:" + JSON.stringify(data));
       if (data.coords) {
         this.speed = data.coords.speed;
         if (this.isLogging()) { this.storeLog('gps', JSON.stringify(data.coords)); }
@@ -145,6 +148,7 @@ export class HomePage {
           this.toggleButtonState();
           this.utils.presentToast("trip recording started");
           this.startAllSensors();
+          this.utils.startTimer(this.timer);
           // make sure screen stays awake
           this.insomnia.keepAwake()
             .then((succ) => { console.log("*** POWER OK **") })
@@ -159,7 +163,7 @@ export class HomePage {
   // stops trip, and associated sensors
   stopTrip() {
     console.log("Inside stop trip");
-
+    this.utils.stopTimer(this.timer);
     this.stopAllSensors();
     // make sure screen stays awake
     this.insomnia.allowSleepAgain()

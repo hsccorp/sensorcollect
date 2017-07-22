@@ -17,7 +17,7 @@
   <ion-grid>
     <ion-row>
       <ion-col>
-        <button  ion-button (click)="toggleLog()" [color]=stateColor icon-left><ion-icon name="car"></ion-icon>{{logState}} Trip
+        <button  ion-button (click)="toggleLog()" [color]=stateColor icon-left><ion-icon name="car"></ion-icon>{{logState}} Trip {{timer.time}}
         </button>
       </ion-col>
       
@@ -25,6 +25,7 @@
         <button *ngIf='logState=="Start"' ion-button  icon-left (click)="share()" color="secondary"><ion-icon name="share"></ion-icon>Share</button>
       </ion-col>
     </ion-row>
+    
     <ion-row wrap *ngIf='logState=="Stop"'>
       <ion-col>
         <button ion-button small color="light" (click)="setMarker('pick')">pick</button>

@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
 import { ToastController, LoadingController } from 'ionic-angular';
 import { File } from '@ionic-native/file';
+import { Observable } from 'rxjs/Rx';
+import * as moment from 'moment';
 
 @Injectable()
 export class CommonUtilsProvider {
 
   loader:any;
   logFile:string = 'triplog.txt';
+  timer:any;
 
   constructor(public toastCtrl: ToastController,public loadingCtrl: LoadingController, public file:File) {
    
@@ -76,4 +79,17 @@ export class CommonUtilsProvider {
       this.presentToast("clearing log file");
       return this.file.writeFile(this.file.dataDirectory,"triplog.txt","",{replace:true});
   }
+
+  startTimer(timer) {
+    
+    this.timer = Observable.interval(1000)
+    .subscribe(x=>{timer.time = "("+moment.utc(x*1000).format("HH:mm:ss")+")";});
+  }
+
+   stopTimer(timer) {
+    
+    this.timer.unsubscribe();
+    timer.time = "";
+  }
+
 }
