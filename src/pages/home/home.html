@@ -61,7 +61,7 @@
       </ion-segment-button>
     </ion-segment>
   </div>
-  <p>Acc:{{mAcc | number:'1.2-2' }}, Move:{{move}}, MoveCnt:{{moveCount}}, Speed:{{speed}}</p>
+  <p>Acc:{{mAcc | number:'1.2-2' }}, Move:{{move}}, MoveCnt:{{moveCount}}, Speed:{{speed | number:'1.2-2'}}mph</p>
   <div [ngSwitch]="viewMode">
     <div *ngSwitchCase="'raw'">
       <h4>Acceleration:</h4> {{acc}}

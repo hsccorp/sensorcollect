@@ -51,7 +51,7 @@ export class HomePage {
   moveCount: number = 0; // times you 'saw' the phone in a trip
   moveThreshold: number = 3; // tweak this for above sensitivity
   speed: number = 0; // holds GPS speed if applicable
-  timer = {'time':""};
+  timer = { 'time': "" }; //trip timer
 
 
   // init
@@ -69,7 +69,7 @@ export class HomePage {
   toggleButtonState() {
     this.logState = (this.logState == 'Start') ? 'Stop' : 'Start';
     this.stateColor = (this.logState == 'Start') ? 'primary' : 'danger';
-    console.log ("******* BUTTON IS NOW "+this.logState);
+    console.log("******* BUTTON IS NOW " + this.logState);
   }
 
   // unsubscribe from all sensors once trip ends
@@ -78,7 +78,7 @@ export class HomePage {
       accSub.unsubscribe();
       gyrSub.unsubscribe();
       navigator.geolocation.clearWatch(gpsSub); // not sure why this is needed
-      gpsSub.unsubscribe(); 
+      gpsSub.unsubscribe();
     }
     catch (e) {
       console.log("stop sensor error: " + e);
@@ -90,14 +90,14 @@ export class HomePage {
   startAllSensors() {
     // listen to acc. data
     accSub = this.deviceMotion.watchAcceleration({ frequency: this.freq }).subscribe((acceleration: DeviceMotionAccelerationData) => {
-      console.log (">>>TIMER:"+this.timer.time);
+      console.log(">>>TIMER:" + this.timer.time);
       this.process(acceleration, this.charts.accChart, 'acc');
     });
 
     // listen to gyro data
-    gyrSub= this.gyroscope.watch({ frequency: this.freq })
+    gyrSub = this.gyroscope.watch({ frequency: this.freq })
       .subscribe((gyroscope: GyroscopeOrientation) => {
-        console.log ("Gyro:"+JSON.stringify(gyroscope));
+        console.log("Gyro:" + JSON.stringify(gyroscope));
         this.process(gyroscope, this.charts.gyroChart, 'gyro');
 
       });
@@ -111,16 +111,17 @@ export class HomePage {
   // attaches to the GPS and logs readings, for speeds
   latchGPS() {
     console.log(">>>>GPS Latching...");
-    gpsSub = this.geo.watchPosition({enableHighAccuracy:true})
-    .subscribe((data) => {
-      //console.log("GPS:" + JSON.stringify(data));
-      if (data.coords) {
-        this.speed = data.coords.speed;
-        if (this.isLogging()) { this.storeLog('gps', JSON.stringify(data.coords)); }
+    gpsSub = this.geo.watchPosition({ enableHighAccuracy: true })
+      .subscribe((data) => {
+        //console.log("GPS:" + JSON.stringify(data));
+        if (data.coords) {
+          // this is meters per sec, convert to mph
+          this.speed = data.coords.speed * 2.23694;
+          if (this.isLogging()) { this.storeLog('gps', JSON.stringify(data.coords)); }
 
-      }
+        }
 
-    });
+      });
   }
 
   // init code to start a trip
@@ -239,7 +240,7 @@ export class HomePage {
         if (this.oldZ != -1000) {
           this.move = 'YES';
           this.moveCount++;
-          if (this.isLogging()) { this.storeLog('Analytics', { 'value': Math.abs(object.z - this.oldZ), 'threshold': this.moveThreshold, 'action':'Move' }) }
+          if (this.isLogging()) { this.storeLog('Analytics', { 'value': Math.abs(object.z - this.oldZ), 'threshold': this.moveThreshold, 'action': 'Move' }) }
         }
 
       }
