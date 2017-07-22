@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ToastController, LoadingController } from 'ionic-angular';
 import { File } from '@ionic-native/file';
-import { Storage } from '@ionic/storage';
 
 @Injectable()
 export class CommonUtilsProvider {

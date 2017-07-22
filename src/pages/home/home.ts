@@ -13,7 +13,10 @@ import { Insomnia } from '@ionic-native/insomnia';
 import { CommonUtilsProvider } from '../../providers/common-utils/common-utils';
 import { AlertController } from 'ionic-angular';
 
-var gps;
+// will hold subscriptions to sensors
+var gps: any = null;
+var acc: any = null;
+var gyr: any = null;
 
 @Component({
   selector: 'page-home',
@@ -21,14 +24,16 @@ var gps;
 })
 
 export class HomePage {
-
+  // handles to DOM for graphs
   @ViewChild('acc') accCanvas;
   @ViewChild('gyro') gyroCanvas;
 
+  // models for DOM charts
   charts: {
     accChart: any,
     gyroChart: any,
   } = { accChart: null, gyroChart: null };
+
   acc: any;  // latest accelerometer data
   gyro: any; // latest gyro data
   logState: string = 'Start'; // button state
@@ -48,41 +53,14 @@ export class HomePage {
   speed: number = 0; // holds GPS speed if applicable
 
 
-
+  // init
   constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController) {
-
 
     plt.ready().then(() => {
       //this.charts = {};
       this.utils.initLog();
-
-      this.createChart(this.charts, this.accCanvas.nativeElement, 'acc');
-      this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro');
-
-      // listen to acc. data
-      var as = this.deviceMotion.watchAcceleration({ frequency: this.freq }).subscribe((acceleration: DeviceMotionAccelerationData) => {
-        this.process(acceleration, this.charts.accChart, 'acc');
-      });
-
-      // listen to gyro data
-      var gs = this.gyroscope.watch({ frequency: this.freq })
-        .subscribe((gyroscope: GyroscopeOrientation) => {
-          this.process(gyroscope, this.charts.gyroChart, 'gyro');
-
-        });
-
-    
-      
-      this.perm.checkPermission(this.perm.PERMISSION.ACCESS_FINE_LOCATION).then(
-        success => { this.latchGPS(); }, err => { this.utils.presentToast("Error latching to GPS", "error"); });
-
-    
-
-      // make sure screen stays awake
-      this.insomnia.keepAwake()
-        .then((succ) => { console.log("*** POWER OK **") })
-        .catch((err) => { this.utils.presentToast("could not grab wakelock, screen will dim", "error"); });
-
+      this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Accelerometer');
+      this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
     });
 
   }
@@ -92,13 +70,64 @@ export class HomePage {
     this.stateColor = (this.logState == 'Start') ? 'primary' : 'danger';
   }
 
+  // unsubscribe from all sensors once trip ends
+  stopAllSensors() {
+    try {
+      acc.unsubscribe();
+      gyr.unsubscribe();
+      navigator.geolocation.clearWatch(gps);
+      gps.unsubscribe(); // not sure why this doesn't work
+    }
+    catch (e) {
+      console.log("stop sensor error: " + e);
+    }
+
+  }
+
+  // start listening to sensors when trip starts
+  startAllSensors() {
+    // listen to acc. data
+    acc = this.deviceMotion.watchAcceleration({ frequency: this.freq }).subscribe((acceleration: DeviceMotionAccelerationData) => {
+      this.process(acceleration, this.charts.accChart, 'acc');
+    });
+
+    // listen to gyro data
+    gyr = this.gyroscope.watch({ frequency: this.freq })
+      .subscribe((gyroscope: GyroscopeOrientation) => {
+        console.log ("Gyro:"+JSON.stringify(gyroscope));
+        this.process(gyroscope, this.charts.gyroChart, 'gyro');
+
+      });
+
+    this.perm.checkPermission(this.perm.PERMISSION.ACCESS_FINE_LOCATION).then(
+      success => { this.latchGPS(); }, err => { this.utils.presentToast("Error latching to GPS", "error"); });
+
+
+  }
+
+  // attaches to the GPS and logs readings, for speeds
+  latchGPS() {
+    console.log(">>>>GPS Latching...");
+    gps = this.geo.watchPosition({enableHighAccuracy:true})
+    .subscribe((data) => {
+      console.log("GPS:" + JSON.stringify(data));
+      if (data.coords) {
+        this.speed = data.coords.speed;
+        if (this.isLogging()) { this.storeLog('gps', JSON.stringify(data.coords)); }
+
+      }
+
+    });
+  }
+
+  // init code to start a trip
   startTrip() {
     this.moveCount = 0;
     let alert = this.alert.create({
       title: 'Name your trip',
       inputs: [{
         name: 'name',
-        placeholder: 'My Trip',
+        placeholder: 'Your trip name',
       }],
 
       buttons: [{
@@ -106,9 +135,6 @@ export class HomePage {
         role: 'cancel',
         handler: data => {
           console.log('Cancel clicked');
-          this.startTripHeader(Date());
-          this.toggleButtonState();
-          this.utils.presentToast("trip recording started");
         }
 
       },
@@ -117,6 +143,12 @@ export class HomePage {
         handler: data => {
           this.startTripHeader(data.name || Date());
           this.toggleButtonState();
+          this.utils.presentToast("trip recording started");
+          this.startAllSensors();
+          // make sure screen stays awake
+          this.insomnia.keepAwake()
+            .then((succ) => { console.log("*** POWER OK **") })
+            .catch((err) => { this.utils.presentToast("could not grab wakelock, screen will dim", "error"); });
         },
       }],
     });
@@ -124,20 +156,41 @@ export class HomePage {
 
   }
 
-  latchGPS() {
-        console.log (">>>>GPS Latching...");
-         gps = this.geo.watchPosition();
+  // stops trip, and associated sensors
+  stopTrip() {
+    console.log("Inside stop trip");
 
-          gps.subscribe((data) => {
-            console.log("GPS:" + JSON.stringify(data));
-            if (data.coords) {
-              this.speed = data.coords.speed;
-              if (this.isLogging()) { this.storeLog('gps', JSON.stringify(data.coords)); }
+    this.stopAllSensors();
+    // make sure screen stays awake
+    this.insomnia.allowSleepAgain()
+      .then((succ) => { console.log("*** WAKE LOCK RELEASED OK **") })
+      .catch((err) => { console.log("Error, releasing wake lock:" + err) });
 
-            }
+    try {
 
-          });
-      }
+      this.flushLog().then(_ => {
+        let str = "]},\n";
+        console.log("STOPPING TRIP, writing " + str);
+        this.utils.writeString(str);
+        this.clearArray();
+        this.toggleButtonState();
+        this.utils.presentToast("trip recording stopped");
+      }, (error) => (console.log(error)));
+    }
+    catch (err) { console.log("CATCH=" + err); }
+
+  }
+
+  startTripHeader(tname) {
+    let str = "{\n    id:\"" + tname + "\",\n";
+    str += "    sensors:[\n";
+    console.log("STARTING TRIP, writing " + str);
+    this.utils.writeString(str)
+      .then(resp => { })
+      .catch(e => { "ERROR:" + e });
+
+  }
+
 
   // given a sensor object, updates graph and log 
   process(object, chart, type) {
@@ -148,13 +201,10 @@ export class HomePage {
       chart.data.datasets[0].data.push(object.x);
       chart.data.labels.shift();
       chart.data.labels.push("");
-
-
       chart.data.datasets[1].data.shift();
       chart.data.datasets[1].data.push(object.y);
       chart.data.labels.shift();
       chart.data.labels.push("");
-
       chart.data.datasets[2].data.shift();
       chart.data.datasets[2].data.push(object.z);
       chart.data.labels.shift();
@@ -185,7 +235,7 @@ export class HomePage {
         if (this.oldZ != -1000) {
           this.move = 'YES';
           this.moveCount++;
-          if (this.isLogging()) { this.storeLog('Move', { 'value': Math.abs(object.z - this.oldZ), 'threshold': this.moveThreshold }) }
+          if (this.isLogging()) { this.storeLog('Analytics', { 'value': Math.abs(object.z - this.oldZ), 'threshold': this.moveThreshold, 'action':'Move' }) }
         }
 
       }
@@ -212,13 +262,14 @@ export class HomePage {
 
   }
 
-
+  // this adds 'events' to the log. Use it for analysis - before you perform an action
+  // you want to train, set an appropriate marker
   setMarker(str) {
 
-       if (this.isLogging()) { 
-         this.storeLog('Marker', str ); 
-         this.utils.presentToast(str+' market set','success',1500);
-        }
+    if (this.isLogging()) {
+      this.storeLog('Marker', str);
+      this.utils.presentToast(str + ' market set', 'success', 1500);
+    }
 
   }
 
@@ -227,6 +278,7 @@ export class HomePage {
   share() {
     let f = this.utils.logFileLocation();
     let options = {
+      subject: 'TripData trip logs',
       message: 'Trip logs attached',
       files: [f],
       chooserTitle: 'Share via...'
@@ -259,34 +311,7 @@ export class HomePage {
     return this.logState == 'Stop';
   }
 
-  stopTrip() {
 
-    console.log ("Inside stop trip");
-
-    try {
-          
-    this.flushLog().then(_ => {
-      let str = "]},\n";
-      console.log("STOPPING TRIP, writing " + str);
-      this.utils.writeString(str);
-      this.clearArray();
-      this.toggleButtonState();
-      this.utils.presentToast("trip recording stopped");
-    }, (error)=>(console.log(error)));
-  }
-  catch (err) {console.log ("CATCH="+err);}
-
-  }
-
-  startTripHeader(tname) {
-    let str = "{\n    id:\"" + tname + "\",\n";
-    str += "    sensors:[\n";
-    console.log("STARTING TRIP, writing " + str);
-    this.utils.writeString(str)
-    .then (resp=>console.log("OK:"+resp))
-    .catch (e=> { "ERROR:"+e});
-  
-  }
 
   toggleLog() {
     if (this.logState == 'Stop') {
@@ -333,18 +358,21 @@ export class HomePage {
 
   segmentClicked() {
     console.log("SEGMENT CLICKED");
+    this.utils.presentLoader("charting graph..");
     this.dirty = true;
     this.charts.accChart.destroy();
     this.charts.gyroChart.destroy();
     setTimeout(() => {
       console.log("re-drawing chart..");
-      this.createChart(this.charts, this.accCanvas.nativeElement, 'acc');
-      this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro');
+      this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Accelerometer');
+      this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
       ;
-    }, 100);
+      this.utils.removerLoader();
+    }, 500);
   }
 
-  createChart(charthandle, elem, type) {
+  // instantiates charts. Generic function to handle different chart objects
+  createChart(charthandle, elem, type, title = '') {
     console.log("*** Creating Chart");
     let chart;
     chart = new Chart(elem, {
@@ -381,11 +409,12 @@ export class HomePage {
         ]
       },
       options: {
+        title: {
+          display: true,
+          text: title,
+        },
         responsive: true,
-
         scales: {
-
-
           yAxes: [{
             display: true,
 
