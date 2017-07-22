@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { DeviceMotion, DeviceMotionAccelerationData } from '@ionic-native/device-motion';
-import { Gyroscope, GyroscopeOrientation, GyroscopeOptions } from '@ionic-native/gyroscope';
+import { Gyroscope, GyroscopeOrientation } from '@ionic-native/gyroscope';
 import { Geolocation } from '@ionic-native/geolocation';
 import { Platform } from 'ionic-angular';
 import { SocialSharing } from '@ionic-native/social-sharing';
@@ -90,14 +90,13 @@ export class HomePage {
   startAllSensors() {
     // listen to acc. data
     accSub = this.deviceMotion.watchAcceleration({ frequency: this.freq }).subscribe((acceleration: DeviceMotionAccelerationData) => {
-      console.log(">>>TIMER:" + this.timer.time);
       this.process(acceleration, this.charts.accChart, 'acc');
     });
 
     // listen to gyro data
     gyrSub = this.gyroscope.watch({ frequency: this.freq })
       .subscribe((gyroscope: GyroscopeOrientation) => {
-        console.log("Gyro:" + JSON.stringify(gyroscope));
+        //console.log("Gyro:" + JSON.stringify(gyroscope));
         this.process(gyroscope, this.charts.gyroChart, 'gyro');
 
       });

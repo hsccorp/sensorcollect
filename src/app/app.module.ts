@@ -7,8 +7,8 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
 
-import { DeviceMotion, DeviceMotionAccelerationData } from '@ionic-native/device-motion';
-import { Gyroscope, GyroscopeOrientation, GyroscopeOptions } from '@ionic-native/gyroscope';
+import { DeviceMotion } from '@ionic-native/device-motion';
+import { Gyroscope } from '@ionic-native/gyroscope';
 import { SocialSharing } from '@ionic-native/social-sharing';
 import { Insomnia } from '@ionic-native/insomnia';
 import { Geolocation } from '@ionic-native/geolocation';
