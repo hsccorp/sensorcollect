@@ -6,7 +6,7 @@ import { Geolocation } from '@ionic-native/geolocation';
 import { Platform } from 'ionic-angular';
 import { SocialSharing } from '@ionic-native/social-sharing';
 import { Chart } from 'chart.js';
-import { DecimalPipe } from '@angular/common';
+//import { DecimalPipe } from '@angular/common';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
 
 import { Insomnia } from '@ionic-native/insomnia';
