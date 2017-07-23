@@ -7,7 +7,7 @@ import { AngularFireDatabaseModule, AngularFireDatabase, FirebaseListObservable 
 import * as firebase from 'firebase/app';
 import 'firebase/storage';
 
-//declare var firebase: any;
+
 
 @Injectable()
 export class CommonUtilsProvider {
@@ -53,6 +53,7 @@ export class CommonUtilsProvider {
     toast.present();
   }
 
+  
   initLog() {
       this.file.checkFile(this.file.dataDirectory,this.logFile)
       .then(succ=>{console.log("log file exists");})
@@ -64,8 +65,9 @@ export class CommonUtilsProvider {
     return this.file.writeFile(this.file.dataDirectory,this.logFile,str, {replace:false, append:true});
   }
 
+  // dump a fragment of logs to a file
   writeLog(logs_object) {
-    // don't JSON stringify as these are chunks
+    // don't JSON stringify full array as these are chunks
 
     let str = "";
     for (let i=0; i < logs_object.length; i++) {
@@ -86,18 +88,22 @@ export class CommonUtilsProvider {
       return this.file.writeFile(this.file.dataDirectory,"triplog.txt","",{replace:true});
   }
 
+  // start a trip timer
   startTimer(timer) {
     
     this.timer = Observable.interval(1000)
     .subscribe(x=>{timer.time = "("+moment.utc(x*1000).format("HH:mm:ss")+")";});
   }
 
+
+  // stop trip timer
    stopTimer(timer) {
     
     this.timer.unsubscribe();
     timer.time = "";
   }
 
+  // upload trip data to firebase. currently a public bucket
   cloudUpload(prg) {
     console.log ("cloud upload");
     //this.presentLoader("loading...");
@@ -106,6 +112,7 @@ export class CommonUtilsProvider {
     this.file.readAsArrayBuffer(this.file.dataDirectory, this.logFile)
     .then (succ=>{
       console.log ("File read");
+      console.log (succ);
       let blob = new Blob([succ],{type:"text/plain"});
       console.log ("Blob  created");
       let name = "file-"+Date()+".txt";
@@ -114,11 +121,15 @@ export class CommonUtilsProvider {
         (snapshot) => {
           let progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
           prg.val = progress;
-          //this.presentLoader(`uploading:${progress}%`,60000,false);
           
         },
-        (error) => {console.log ("Firebase put error "+error);prg.val = -1; this.presentToast("upload error","error") },
-        () => {prg.val = -1; this.presentToast("upload complete")}
+        (error) => {
+            console.log ("Firebase put error "+error);
+            setTimeout(()=>{prg.val = -1; },500);
+            this.presentToast("upload error","error") },
+        () => { prg.val = 100;
+                setTimeout(()=>{prg.val = -1; },500);
+                this.presentToast("upload complete")}
       )
 
     })

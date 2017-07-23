@@ -6,9 +6,7 @@ import { Geolocation } from '@ionic-native/geolocation';
 import { Platform } from 'ionic-angular';
 import { SocialSharing } from '@ionic-native/social-sharing';
 import { Chart } from 'chart.js';
-//import { DecimalPipe } from '@angular/common';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
-
 import { Insomnia } from '@ionic-native/insomnia';
 import { CommonUtilsProvider } from '../../providers/common-utils/common-utils';
 import { AlertController } from 'ionic-angular';
@@ -60,7 +58,6 @@ export class HomePage {
   constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController) {
 
     plt.ready().then(() => {
-      //this.charts = {};
       this.utils.initLog();
       this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Accelerometer');
       this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
@@ -125,7 +122,7 @@ export class HomePage {
         if (data.coords) {
           // this is meters per sec, convert to mph
           this.speed = data.coords.speed * 2.23694;
-          if (this.isLogging()) { this.storeLog('gps', JSON.stringify(data.coords)); }
+          if (this.isLogging()) { this.storeLog('gps', data.coords); }
 
         }
 
@@ -259,19 +256,19 @@ export class HomePage {
 
       this.oldZ = object.z;
 
-      if (this.isLogging()) { this.storeLog('Acc', this.acc); }
+      if (this.isLogging()) { this.storeLog('Acc', object); }
 
     } // if acc
 
     else if (type == 'gyro') {
       this.gyro = JSON.stringify(object);
-      if (this.isLogging()) { this.storeLog('Gyro', this.gyro); }
+      if (this.isLogging()) { this.storeLog('Gyro', object); }
     }
 
     else // some other data point 
     {
 
-      if (this.isLogging()) { this.storeLog(type, JSON.stringify(object)); }
+      if (this.isLogging()) { this.storeLog(type, object); }
     }
 
   }
@@ -306,10 +303,9 @@ export class HomePage {
     });
   }
 
-  storeLog(type, str) {
-    //console.log("StoreLog");
-    this.logs.push({ type: type, data: str, date: Date() })
-    //console.log (JSON.stringify(this.logs));
+  // writes to memory, and periodically flushes
+  storeLog(type, obj) {
+    this.logs.push({ type: type, data: obj, date: Date() })
     this.logRows = this.logs.length;
     if (this.logRows > 100) { this.flushLog(); this.clearArray(); }
   }
