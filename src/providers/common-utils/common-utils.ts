@@ -117,8 +117,8 @@ export class CommonUtilsProvider {
           //this.presentLoader(`uploading:${progress}%`,60000,false);
           
         },
-        (error) => {console.log ("Firebase put error "+error);prg.val = -1 },
-        () => {prg.val = -1;}
+        (error) => {console.log ("Firebase put error "+error);prg.val = -1; this.presentToast("upload error","error") },
+        () => {prg.val = -1; this.presentToast("upload complete")}
       )
 
     })
