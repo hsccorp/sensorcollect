@@ -34,7 +34,7 @@ export class HomePage {
     gyroChart: any,
   } = { accChart: null, gyroChart: null };
 
-  progress: {val:number} = {val:-1};
+  progress: {val:number} = {val:-1}; // upload indication
 
   acc: any;  // latest accelerometer data
   gyro: any; // latest gyro data
@@ -68,11 +68,13 @@ export class HomePage {
 
   }
 
+  // uploads file to firebase
   upload() {
     console.log ("upload");
     this.utils.cloudUpload(this.progress);
   }
 
+  // called by start/stop trip
   toggleButtonState() {
     this.logState = (this.logState == 'Start') ? 'Stop' : 'Start';
     this.stateColor = (this.logState == 'Start') ? 'primary' : 'danger';
@@ -151,7 +153,7 @@ export class HomePage {
       {
         text: 'Ok',
         handler: data => {
-          this.startTripHeader(data.name || Date());
+          this.startTripHeader(data.name+Date());
           this.toggleButtonState();
           this.utils.presentToast("trip recording started");
           this.startAllSensors();
@@ -186,6 +188,7 @@ export class HomePage {
         this.clearArray();
         this.toggleButtonState();
         this.utils.presentToast("trip recording stopped");
+        //this.utils.cloudUpload(this.progress);
       }, (error) => (console.log(error)));
     }
     catch (err) { console.log("CATCH=" + err); }
@@ -324,7 +327,7 @@ export class HomePage {
 
 
 
-  toggleLog() {
+  toggleTrip() {
     if (this.logState == 'Stop') {
       // write to file if stopped
       this.stopTrip();
