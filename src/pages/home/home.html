@@ -24,7 +24,16 @@
       <ion-col>
         <button *ngIf='logState=="Start"' ion-button  icon-left (click)="share()" color="secondary"><ion-icon name="share"></ion-icon>Share</button>
       </ion-col>
+
+
+      <ion-col>
+        <button *ngIf='logState=="Start"' ion-button  icon-left (click)="upload()" color="dark"><ion-icon name="cloud-upload"></ion-icon>Upload</button>
+      </ion-col>
     </ion-row>
+
+    
+      <progress-bar   [progress]="progress.val" *ngIf="progress.val!=-1"></progress-bar>
+  
     
     <ion-row wrap *ngIf='logState=="Stop"'>
       <ion-col>

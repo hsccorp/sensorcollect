@@ -3,6 +3,11 @@ import { ToastController, LoadingController } from 'ionic-angular';
 import { File } from '@ionic-native/file';
 import { Observable } from 'rxjs/Rx';
 import * as moment from 'moment';
+import { AngularFireDatabaseModule, AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import * as firebase from 'firebase/app';
+import 'firebase/storage';
+
+//declare var firebase: any;
 
 @Injectable()
 export class CommonUtilsProvider {
@@ -10,15 +15,16 @@ export class CommonUtilsProvider {
   loader:any;
   logFile:string = 'triplog.txt';
   timer:any;
+  
 
-  constructor(public toastCtrl: ToastController,public loadingCtrl: LoadingController, public file:File) {
+  constructor(public toastCtrl: ToastController,public loadingCtrl: LoadingController, public file:File,  public db: AngularFireDatabase) {
    
   }
 
   // pass -1 to dur for infinite
-  presentLoader(text, dur=6000) {
+  presentLoader(text, dur=6000,remove=true) {
 
-    if (this.loader) {this.loader.dismiss();}
+    if (this.loader && remove) {this.loader.dismiss();}
     this.loader = this.loadingCtrl.create ({
       content:text,
       duration:dur
@@ -90,6 +96,35 @@ export class CommonUtilsProvider {
     
     this.timer.unsubscribe();
     timer.time = "";
+  }
+
+  cloudUpload(prg) {
+    console.log ("cloud upload");
+    //this.presentLoader("loading...");
+    let storageRef = firebase.storage().ref();
+    console.log ("storage ref is "+storageRef);
+    this.file.readAsArrayBuffer(this.file.dataDirectory, this.logFile)
+    .then (succ=>{
+      console.log ("File read");
+      let blob = new Blob([succ],{type:"text/plain"});
+      console.log ("Blob  created");
+      let name = "file-"+Date()+".txt";
+      let uploadTask = storageRef.child(`tripdata/${name}`).put(blob); 
+      uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
+        (snapshot) => {
+          let progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+          prg.val = progress;
+          //this.presentLoader(`uploading:${progress}%`,60000,false);
+          
+        },
+        (error) => {console.log ("Firebase put error "+error);prg.val = -1 },
+        () => {prg.val = -1;}
+      )
+
+    })
+
+    .catch (err=>{console.log ("Cordova Read Error "+err);})
+
   }
 
 }

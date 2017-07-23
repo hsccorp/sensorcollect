@@ -34,6 +34,8 @@ export class HomePage {
     gyroChart: any,
   } = { accChart: null, gyroChart: null };
 
+  progress: {val:number} = {val:-1};
+
   acc: any;  // latest accelerometer data
   gyro: any; // latest gyro data
   logState: string = 'Start'; // button state
@@ -64,6 +66,11 @@ export class HomePage {
       this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
     });
 
+  }
+
+  upload() {
+    console.log ("upload");
+    this.utils.cloudUpload(this.progress);
   }
 
   toggleButtonState() {

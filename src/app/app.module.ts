@@ -15,14 +15,34 @@ import { Geolocation } from '@ionic-native/geolocation';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { CommonUtilsProvider } from '../providers/common-utils/common-utils';
 import { File } from '@ionic-native/file';
+import { AngularFireModule } from 'angularfire2';
+import {AngularFireDatabaseModule} from 'angularfire2/database';
+import { AngularFireAuthModule } from 'angularfire2/auth';
+
+import { ProgressBarComponent } from '../components/progress-bar/progress-bar';
+
+
+// Initialize Firebase
+  export const firebaseConfig = {
+   apiKey: "AIzaSyCldDUKjFcG0YTS6Oj1n2kn0oT9cFQN878",
+    authDomain: "tripdata-3eb84.firebaseapp.com",
+    databaseURL: "https://tripdata-3eb84.firebaseio.com",
+    projectId: "tripdata-3eb84",
+    storageBucket: "tripdata-3eb84.appspot.com",
+    messagingSenderId: "329888799939"
+  };
 
 
 @NgModule({
   declarations: [
     MyApp,
-    HomePage
+    HomePage,
+    ProgressBarComponent
   ],
   imports: [
+    AngularFireModule.initializeApp(firebaseConfig),
+    AngularFireDatabaseModule,
+    AngularFireAuthModule,
     BrowserModule,
     IonicModule.forRoot(MyApp)
   ],
