@@ -1,7 +1,6 @@
-simple app to collect trip data. Accelerometer seems much more useful than gyroscope in general.
-Gyr is better at detecting turns but as far as driver distraction goes, acc does a good job.
+an app to collect sensor data in a mobile app. Meant to be used while in a car. I am currently logging accelerometer, gyroscope and GPS data.
 
-In addition to collecting data, I'm also logging a simple heuristic of tracking acc's Z-axis. Assuming you move the phone forward when peeking, z-axis seems to be the best indication so far.
+In addition to collecting data, I'm also logging a simple heuristic of tracking the accelerometer's Z-axis. Assuming you move the phone forward when peeking, z-axis seems to be the best indication so far.
 
 
 Download
