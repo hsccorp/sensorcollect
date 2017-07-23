@@ -24,8 +24,13 @@ Screenshots
 
 Compilation
 -----------
-* Needs [ionic 2](https://ionicframework.com/docs/intro/installation/)
-* compile with `--prod` for faster speeds
+* Install [ionic 2](https://ionicframework.com/docs/intro/installation/)
+* git clone `https://github.com/hsccorp/sensorcollect && cd sensorcollect`
+* `npm install`
+* `ionic cordova platform add ios` and/or `ionic cordova platform add android`
+* `ionic cordova  build ios --prod` and/or `ionic cordova build android --prod`
+*  `--prod` is for faster speeds/ahead of time compiling
+* iOS note - if you get build errors at first run, you might just need to associate a signing certificate to the project in XCode (one time only)
 
 
 Image credits
