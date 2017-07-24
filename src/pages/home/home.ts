@@ -256,7 +256,7 @@ export class HomePage {
 
       // see if phone move matches threshold. Lets make sure we don't double count
       // active moves
-      if ((Math.abs(object.z - this.oldZ) >= this.moveThreshold) && (this.move == 'no')) {
+      if ((Math.abs(object.z - this.oldZ) >= this.moveThreshold) && (this.move == 'no ')) {
         if (this.oldZ != -1000) {
           this.move = 'YES';
           this.moveCount++;
