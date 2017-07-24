@@ -193,8 +193,8 @@ export class HomePage {
   }
 
   startTripHeader(tname) {
-    let str = "{\n    id:\"" + tname + "\",\n";
-    str += "    sensors:[\n";
+    let str = "{\n    \"id\":\"" + tname + "\",\n";
+    str += "    \"sensors\":[\n";
     console.log("STARTING TRIP, writing " + str);
     this.utils.writeString(str)
       .then(resp => { })
