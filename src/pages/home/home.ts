@@ -11,10 +11,6 @@ import { Insomnia } from '@ionic-native/insomnia';
 import { CommonUtilsProvider } from '../../providers/common-utils/common-utils';
 import { AlertController } from 'ionic-angular';
 
-// will hold subscriptions to sensors
-var gpsSub: any = null;
-var accSub: any = null;
-var gyrSub: any = null;
 
 @Component({
   selector: 'page-home',
@@ -22,6 +18,13 @@ var gyrSub: any = null;
 })
 
 export class HomePage {
+
+
+  // will hold subscriptions to sensors
+  gpsSub: any = null;
+  accSub: any = null;
+  gyrSub: any = null;
+
   // handles to DOM for graphs
   @ViewChild('acc') accCanvas;
   @ViewChild('gyro') gyroCanvas;
@@ -32,7 +35,7 @@ export class HomePage {
     gyroChart: any,
   } = { accChart: null, gyroChart: null };
 
-  progress: {val:number} = {val:-1}; // upload indication
+  progress: { val: number } = { val: -1 }; // upload indication
 
   acc: any;  // latest accelerometer data
   gyro: any; // latest gyro data
@@ -46,7 +49,7 @@ export class HomePage {
   mLastAcc: number = 0;
   mCurrAcc: number = 0;
   mAcc: number = 0;
-  move: string = "no"; // heuristic to calc. if we picked up phone
+  move: string = "no "; // heuristic to calc. if we picked up phone
   oldZ: number = -1000;
   moveCount: number = 0; // times you 'saw' the phone in a trip
   moveThreshold: number = 3; // tweak this for above sensitivity
@@ -67,24 +70,18 @@ export class HomePage {
 
   // uploads file to firebase
   upload() {
-    console.log ("upload");
-    this.utils.cloudUpload(this.progress);
+    console.log("upload");
+    this.utils.cloudUploadWithAuth(this.progress);
   }
 
-  // called by start/stop trip
-  toggleButtonState() {
-    this.logState = (this.logState == 'Start') ? 'Stop' : 'Start';
-    this.stateColor = (this.logState == 'Start') ? 'primary' : 'danger';
-    console.log("******* BUTTON IS NOW " + this.logState);
-  }
-
+  
   // unsubscribe from all sensors once trip ends
   stopAllSensors() {
     try {
-      accSub.unsubscribe();
-      gyrSub.unsubscribe();
-      navigator.geolocation.clearWatch(gpsSub); // not sure why this is needed
-      gpsSub.unsubscribe();
+      this.accSub.unsubscribe();
+      this.gyrSub.unsubscribe();
+      navigator.geolocation.clearWatch(this.gpsSub); // not sure why this is needed
+      this.gpsSub.unsubscribe();
     }
     catch (e) {
       console.log("stop sensor error: " + e);
@@ -95,12 +92,12 @@ export class HomePage {
   // start listening to sensors when trip starts
   startAllSensors() {
     // listen to acc. data
-    accSub = this.deviceMotion.watchAcceleration({ frequency: this.freq }).subscribe((acceleration: DeviceMotionAccelerationData) => {
+    this.accSub = this.deviceMotion.watchAcceleration({ frequency: this.freq }).subscribe((acceleration: DeviceMotionAccelerationData) => {
       this.process(acceleration, this.charts.accChart, 'acc');
     });
 
     // listen to gyro data
-    gyrSub = this.gyroscope.watch({ frequency: this.freq })
+    this.gyrSub = this.gyroscope.watch({ frequency: this.freq })
       .subscribe((gyroscope: GyroscopeOrientation) => {
         //console.log("Gyro:" + JSON.stringify(gyroscope));
         this.process(gyroscope, this.charts.gyroChart, 'gyro');
@@ -116,7 +113,7 @@ export class HomePage {
   // attaches to the GPS and logs readings, for speeds
   latchGPS() {
     console.log(">>>>GPS Latching...");
-    gpsSub = this.geo.watchPosition({ enableHighAccuracy: true })
+    this.gpsSub = this.geo.watchPosition({ enableHighAccuracy: true })
       .subscribe((data) => {
         //console.log("GPS:" + JSON.stringify(data));
         if (data.coords) {
@@ -128,6 +125,14 @@ export class HomePage {
 
       });
   }
+
+  // called by start/stop trip
+  toggleButtonState() {
+    this.logState = (this.logState == 'Start') ? 'Stop' : 'Start';
+    this.stateColor = (this.logState == 'Start') ? 'primary' : 'danger';
+    console.log("******* BUTTON IS NOW " + this.logState);
+  }
+
 
   // init code to start a trip
   startTrip() {
@@ -150,7 +155,7 @@ export class HomePage {
       {
         text: 'Ok',
         handler: data => {
-          this.startTripHeader(data.name+Date());
+          this.startTripHeader(data.name + Date());
           this.toggleButtonState();
           this.utils.presentToast("trip recording started");
           this.startAllSensors();
@@ -192,6 +197,9 @@ export class HomePage {
 
   }
 
+  // called by start trip. Writes a header 
+  // we need this because weare writing logs in chunks
+  // that eventually need to represent valid JSON objects
   startTripHeader(tname) {
     let str = "{\n    \"id\":\"" + tname + "\",\n";
     str += "    \"sensors\":[\n";
@@ -201,7 +209,6 @@ export class HomePage {
       .catch(e => { "ERROR:" + e });
 
   }
-
 
   // given a sensor object, updates graph and log 
   process(object, chart, type) {
@@ -222,7 +229,6 @@ export class HomePage {
       chart.data.labels.push("");
 
       setTimeout(() => {
-        //console.log("updating chart..");
         chart.update();
       }, 100);
     }
@@ -235,10 +241,9 @@ export class HomePage {
 
       this.acc = JSON.stringify(object);
       this.mLastAcc = this.mCurrAcc;
-
       this.mCurrAcc = Math.sqrt(object.x * object.x + object.y * object.y + object.z * object.z);
       let delta = this.mCurrAcc - this.mLastAcc;
-      this.mAcc = this.mAcc * 0.9 + delta;
+      this.mAcc = this.mAcc * 0.9 + delta; // not sure what we will do with this, yet
 
       // see if phone move matches threshold. Lets make sure we don't double count
       // active moves
@@ -246,12 +251,14 @@ export class HomePage {
         if (this.oldZ != -1000) {
           this.move = 'YES';
           this.moveCount++;
-          if (this.isLogging()) { this.storeLog('Analytics', { 'value': Math.abs(object.z - this.oldZ), 'threshold': this.moveThreshold, 'action': 'Move' }) }
+          // log real value, not abs. As it turns out hard braking is also Z dependant and 
+          // possibly the opp. of this. Needs investigation.
+          if (this.isLogging()) { this.storeLog('Analytics', { 'value': object.z - this.oldZ, 'threshold': this.moveThreshold, 'action': 'Move' }) }
         }
 
       }
       else {
-        this.move = 'no';
+        this.move = 'no ';
       }
 
       this.oldZ = object.z;

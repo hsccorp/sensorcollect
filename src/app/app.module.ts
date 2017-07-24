@@ -20,6 +20,7 @@ import {AngularFireDatabaseModule} from 'angularfire2/database';
 import { AngularFireAuthModule } from 'angularfire2/auth';
 
 import { ProgressBarComponent } from '../components/progress-bar/progress-bar';
+import { IonicStorageModule } from '@ionic/storage';
 
 
 // Initialize Firebase
@@ -44,7 +45,8 @@ import { ProgressBarComponent } from '../components/progress-bar/progress-bar';
     AngularFireDatabaseModule,
     AngularFireAuthModule,
     BrowserModule,
-    IonicModule.forRoot(MyApp)
+    IonicModule.forRoot(MyApp),
+    IonicStorageModule.forRoot({name:'__tripDB', driverOrder:['sqlite','websql','indexeddb']})
   ],
   bootstrap: [IonicApp],
   entryComponents: [
