@@ -40,6 +40,8 @@ export class HomePage {
   acc: any;  // latest accelerometer data
   gyro: any; // latest gyro data
   logState: string = 'Start'; // button state
+  pause:boolean = false; // true if recording paused
+  pauseColor:string = 'dark';
   stateColor: string = 'primary'; // button color
   logs: any[] = []; // will hold history of acc + gyr data
   logRows: number = 0;
@@ -133,9 +135,16 @@ export class HomePage {
     console.log("******* BUTTON IS NOW " + this.logState);
   }
 
+  togglePause() {
+    this.pause = !this.pause;
+    this.pauseColor = (this.pauseColor == 'dark') ? 'primary': 'dark';
+  }
+
 
   // init code to start a trip
   startTrip() {
+    this.pause = false;
+    this.pauseColor = 'dark';
     this.moveCount = 0;
     let alert = this.alert.create({
       title: 'Name your trip',
@@ -325,7 +334,7 @@ export class HomePage {
 
 
   isLogging(): boolean {
-    return this.logState == 'Stop';
+    return this.logState == 'Stop' && this.pause == false;
   }
 
 

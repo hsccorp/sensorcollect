@@ -20,6 +20,11 @@
         <button  ion-button (click)="toggleTrip()" [color]=stateColor icon-left><ion-icon name="car"></ion-icon>{{logState}} Trip {{timer.time}}
         </button>
       </ion-col>
+
+      <ion-col>
+         <button *ngIf="logState=='Stop'" ion-button (click)="togglePause()" [color]=pauseColor icon-left><ion-icon name="pause"></ion-icon>Pause{{pause?'d':''}}
+        </button>
+      </ion-col>
       
       <ion-col>
         <button *ngIf='logState=="Start"' ion-button  icon-left (click)="share()" color="secondary"><ion-icon name="share"></ion-icon>Share</button>
@@ -70,7 +75,7 @@
       </ion-segment-button>
     </ion-segment>
   </div>
-  <p>Distract:{{move}} ({{moveCount}} times, Speed:{{speed | number:'1.2-2'}}mph</p>
+  <p>Distract:{{move}} ({{moveCount}} times), Speed:{{speed | number:'1.2-2'}}mph</p>
   <div [ngSwitch]="viewMode">
     <div *ngSwitchCase="'raw'">
       <h4>Acceleration:</h4> {{acc}}
