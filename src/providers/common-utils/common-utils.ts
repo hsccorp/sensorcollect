@@ -115,8 +115,10 @@ export class CommonUtilsProvider {
       console.log (succ);
       let blob = new Blob([succ],{type:"text/plain"});
       console.log ("Blob  created");
-      let name = "file-"+Date()+".txt";
-      let uploadTask = storageRef.child(`tripdata/${name}`).put(blob); 
+      var un = new Date().getTime();
+      let name = "trip-"+un;
+      let uploadUrl = storageRef.child(`tripdata/${name}`);
+      let uploadTask = uploadUrl.put(blob); 
       uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
         (snapshot) => {
           let progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
@@ -129,13 +131,19 @@ export class CommonUtilsProvider {
             this.presentToast("upload error","error") },
         () => { prg.val = 100;
                 setTimeout(()=>{prg.val = -1; },500);
+                // write download URL to realtime DB so we can iter it later
+                // there is no API in storage today to iterate
+                let  downloadURL = uploadTask.snapshot.downloadURL;
+                console.log ("Download url is "+downloadURL);
+                let key = 'tripDataIndex/'+name;
+                console.log ("key="+key);
+                 firebase.database().ref(key)
+                .set ({'url':downloadURL, 'uploadedon':Date()})
+                .catch (err=> {console.log ("ERROR "+err);this.presentToast("error creating index","error")})
                 this.presentToast("upload complete")}
       )
-
     })
-
     .catch (err=>{console.log ("Cordova Read Error "+err);})
-
   }
 
 }
