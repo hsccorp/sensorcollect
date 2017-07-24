@@ -135,9 +135,9 @@ export class CommonUtilsProvider {
                 // there is no API in storage today to iterate
                 let  downloadURL = uploadTask.snapshot.downloadURL;
                 console.log ("Download url is "+downloadURL);
-                let key = 'tripDataIndex/'+name;
-                console.log ("key="+key);
-                 firebase.database().ref(key)
+                //let key = 'tripDataIndex/'+name;
+                //console.log ("key="+key);
+                 firebase.database().ref('tripDataIndex/').push()
                 .set ({'url':downloadURL, 'uploadedon':Date()})
                 .catch (err=> {console.log ("ERROR "+err);this.presentToast("error creating index","error")})
                 this.presentToast("upload complete")}
