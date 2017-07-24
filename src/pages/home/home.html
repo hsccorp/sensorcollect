@@ -21,18 +21,18 @@
         </button>
       </ion-col>
 
-      <ion-col>
-         <button *ngIf="logState=='Stop'" ion-button (click)="togglePause()" [color]=pauseColor icon-left><ion-icon name="pause"></ion-icon>Pause{{pause?'d':''}}
+      <ion-col [hidden]="logState=='Start'">
+         <button   ion-button (click)="togglePause()" [color]=pauseColor icon-left><ion-icon name="pause"></ion-icon>Pause{{pause?'d':''}}
         </button>
       </ion-col>
       
-      <ion-col>
-        <button *ngIf='logState=="Start"' ion-button  icon-left (click)="share()" color="secondary"><ion-icon name="share"></ion-icon>Share</button>
+      <ion-col [hidden] = "logState=='Stop'">
+        <button  ion-button  icon-left (click)="share()" color="secondary"><ion-icon name="share"></ion-icon>Share</button>
       </ion-col>
 
 
-      <ion-col>
-        <button *ngIf='logState=="Start"' ion-button  icon-left (click)="upload()" color="dark"><ion-icon name="cloud-upload"></ion-icon>Upload</button>
+      <ion-col [hidden] = "logState=='Stop'">
+        <button  ion-button  icon-left (click)="upload()" color="dark"><ion-icon name="cloud-upload"></ion-icon>Upload</button>
       </ion-col>
     </ion-row>
 
