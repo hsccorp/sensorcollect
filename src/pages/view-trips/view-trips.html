@@ -14,5 +14,11 @@
 
 
 <ion-content padding>
-Hello, world
+
+  <ion-list>
+    <ion-item *ngFor = "let trip of trips" (click)="displayTrip(trip)">
+      {{trip.id}}
+      <p>{{trip.date}}</p>
+    </ion-item>
+  </ion-list>
 </ion-content>
