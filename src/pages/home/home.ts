@@ -17,6 +17,8 @@ import {ViewTripsPage} from "../view-trips/view-trips";
   templateUrl: 'home.html'
 })
 
+
+
 export class HomePage {
 
 
@@ -24,6 +26,20 @@ export class HomePage {
   gpsSub: any = null;
   accSub: any = null;
   gyrSub: any = null;
+
+   markers = [
+  {name:'left', val:'left', color:'light'},
+  {name:'right', val:'right', color:'light'},
+  {name:'brake', val:'brake', color:'light'},
+  {name:'unknown', val:'unknown', color:'light'},
+
+  {name:'brake', val:'hard-brake', color:'alert'},
+  {name:'distract', val:'distract', color:'alert'},
+  {name:'speedup', val:'speedup', color:'alert'},
+  {name:'left', val:'hard-left', color:'alert'},
+  {name:'right', val:'hard-right', color:'alert'},
+
+]
 
   // handles to DOM for graphs
   @ViewChild('acc') accCanvas;

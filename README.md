@@ -24,7 +24,7 @@ Screenshots
 
 Compilation
 -----------
-* Install [ionic 2](https://ionicframework.com/docs/intro/installation/)
+* Install [ionic 2](https://ionicframework.com/docs/intro/installation/)  
 * git clone `https://github.com/hsccorp/sensorcollect && cd sensorcollect`
 * `npm install`
 * `ionic cordova platform add ios` and/or `ionic cordova platform add android`
