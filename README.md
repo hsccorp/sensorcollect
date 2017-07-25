@@ -11,11 +11,10 @@ Download
 Usage
 -----
 * "Start Trip" to start logging a trip. During this time, a wakelock will be taken, so good to keep the phone powered
-* While a trip is started, tap one of the markers "left", "right" etc. to mark a time when you are about to perform an action to help train scenarios
-* To stop, press "Stop Trip"
-* "Share" lets you share the log file with others
-* "Upload" uploads all your trips to firebase cloud 
-* NOTE: Logs are cumulative. Please tap the "delete" icon on top right to clear logs before you start a trip if you don't want old trips uploaded
+* While a trip is started, tap markers to mark an action for training. Yellow markers are for bad driving, grey for good driving (negative/positive training)
+* To stop, press "Stop Trip". When you stop, the trip is automatically uploaded to firebase
+* "Share" lets you share the latest trip file with others
+* Tap on the "list" icon on top left of navbar to view uploaded trips, slide to share
 
 
 Screenshots
