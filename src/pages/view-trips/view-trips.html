@@ -15,10 +15,23 @@
 
 <ion-content padding>
 
-  <ion-list>
-    <ion-item *ngFor = "let trip of trips" (click)="displayTrip(trip)">
-      {{trip.id}}
-      <p>{{trip.date}}</p>
+  <ion-list nolines>
+    <ion-item *ngIf="!trips.length">
+      No trips found
     </ion-item>
+    <ion-item-sliding #slidingItem *ngFor = "let trip of trips" (click)="displayTrip(trip, slidingItem)">
+      <ion-item >
+        {{trip.name}}
+        <p>{{trip.date}}</p>
+        <p>{{trip.uploadedby}}</p>
+      </ion-item>
+      <ion-item-options>
+          <button ion-button icon-only color="secondary" (click)="share(trip, slidingItem)">
+               <ion-icon name="share"></ion-icon>Share&nbsp;</button>
+      </ion-item-options>
+    </ion-item-sliding>
+    <ion-item>
+    <p text-wrap *ngIf="trips.length">swipe items for options</p>
+  </ion-item>
   </ion-list>
 </ion-content>

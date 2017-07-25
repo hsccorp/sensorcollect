@@ -16,6 +16,7 @@ export class CommonUtilsProvider {
   loader: any;
   logFile: string = 'triplog.txt';
   timer: any;
+  user: {email:string, password:string} = {email:'', password:''};
 
 
   constructor(public toastCtrl: ToastController, public loadingCtrl: LoadingController, public file: File, public db: AngularFireDatabase, public storage: Storage, public alert: AlertController) {
@@ -88,8 +89,6 @@ export class CommonUtilsProvider {
   }
 
   deleteLog() {
-
-    this.presentToast("clearing log file");
     return this.file.writeFile(this.file.dataDirectory, "triplog.txt", "", { replace: true });
   }
 
@@ -162,42 +161,7 @@ export class CommonUtilsProvider {
     return this.storage.get('user');
   }
 
-  cloudGetTrips() {
-     let ref = firebase.database().ref('tripDataIndex/');
-     let trips:any[] = [];
-     ref.on('value', (snapshot) => {
-       console.log(snapshot.val());
-       let result = snapshot.val();
-       /*for (let k in result) {
-        trips.push({
-          id: k,
-          name: result[k]
-        });
-      }*/
-
-     });
-  }
-
-  cloudGetTripsWithAuth() {
-    this.getUser()
-      .then(user => {
-        console.log("Getting " + JSON.stringify(user));
-        if (user == undefined || !user.email || !user.password) {
-          console.log(" no user defined");
-          this.promptForPassword()
-            .then((data) => { this.doAuth(data.email, data.password) })
-            .then (succ => {this.cloudGetTrips()});
-
-        }
-        else { // we have it stored
-          this.doAuth(user.email, user.password)
-          .then (succ => {this.cloudGetTrips()});
-
-        }
-      })
-      .catch(e => { console.log("getUser error" + JSON.stringify(e)) })
-
-  }
+  
 
   
   doAuthWithPrompt(): Promise <any> {
@@ -222,6 +186,8 @@ export class CommonUtilsProvider {
   doAuth(u, p): Promise <any> {
     return new Promise ((resolve,reject) => {
       console.log(`Inside doAuth with ${u}:${p}`);
+      this.user.email = u;
+      this.user.password = p;
     firebase.auth().signInWithEmailAndPassword(u, p)
       .then(succ => { console.log("**** Signed in"); 
       resolve (succ);
@@ -239,8 +205,8 @@ export class CommonUtilsProvider {
 
   // upload trip data to firebase. called by doAuth
   // after all auth validation is done
-  uploadDataToFirebase(prg) {
-    console.log("cloud upload");
+  uploadDataToFirebase(name,prg) {
+    console.log("cloud upload called for "+name);
     //this.presentLoader("loading...");
     let storageRef = firebase.storage().ref();
     console.log("storage ref is " + storageRef);
@@ -250,9 +216,7 @@ export class CommonUtilsProvider {
         console.log(succ);
         let blob = new Blob([succ], { type: "text/plain" });
         console.log("Blob  created");
-        var un = new Date().getTime();
-        let name = "trip-" + un;
-        let uploadUrl = storageRef.child(`tripdata/${name}`);
+        let uploadUrl = storageRef.child(`tripdata/${name}.txt`);
         let uploadTask = uploadUrl.put(blob);
         uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
           (snapshot) => {
@@ -275,7 +239,7 @@ export class CommonUtilsProvider {
             //let key = 'tripDataIndex/'+name;
             //console.log ("key="+key);
             firebase.database().ref('tripDataIndex/').push()
-              .set({ 'url': downloadURL, 'uploadedon': Date() })
+              .set({ 'url': downloadURL, 'uploadedon': Date(), 'uploadedby': this.user.email, 'name':name })
               .catch(err => { console.log("ERROR " + err); this.presentToast("error creating index", "error") })
             this.presentToast("upload complete")
           }

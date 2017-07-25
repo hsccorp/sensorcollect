@@ -57,6 +57,7 @@ export class HomePage {
   moveThreshold: number = 3; // tweak this for above sensitivity
   speed: number = 0; // holds GPS speed if applicable
   timer = { 'time': "" }; //trip timer
+  currentTripName:string ="";
 
 
   // init
@@ -76,10 +77,10 @@ export class HomePage {
   }
 
   // uploads file to firebase
-  upload() {
+  upload(name) {
     console.log("upload");
     this.utils.doAuthWithPrompt()
-    .then (succ => {this.utils.uploadDataToFirebase(this.progress);})
+    .then (succ => {this.utils.uploadDataToFirebase(name,this.progress);})
     .catch (err => {});
 
   }
@@ -172,7 +173,12 @@ export class HomePage {
       {
         text: 'Ok',
         handler: data => {
-          this.startTripHeader(data.name + Date());
+        this.clearArray(); // remove array
+        this.utils.deleteLog() // remove log file
+        .then (_=>{
+          // start new log and start trip
+          this.currentTripName = data.name || 'unnamed trip';
+          this.startTripHeader(this.currentTripName);
           this.toggleButtonState();
           this.utils.presentToast("trip recording started");
           this.startAllSensors();
@@ -181,6 +187,9 @@ export class HomePage {
           this.insomnia.keepAwake()
             .then((succ) => { console.log("*** POWER OK **") })
             .catch((err) => { this.utils.presentToast("could not grab wakelock, screen will dim", "error"); });
+        })
+        .catch (err=>{this.utils.presentToast('problem removing log file', 'error');})
+      
         },
       }],
     });
@@ -201,12 +210,13 @@ export class HomePage {
     try {
 
       this.flushLog().then(_ => {
-        let str = "]},\n";
+        let str = "]}\n";
         console.log("STOPPING TRIP, writing " + str);
         this.utils.writeString(str);
         this.clearArray();
         this.toggleButtonState();
         this.utils.presentToast("trip recording stopped");
+        this.upload(this.currentTripName);
         //this.utils.cloudUpload(this.progress);
       }, (error) => (console.log(error)));
     }
@@ -306,8 +316,7 @@ export class HomePage {
       this.utils.presentToast(str + ' market set', 'success', 1500);
   }
 
-  // currently simply shares via email. No error checking, make sure email is associated
-  // else error
+  
   share() {
     let f = this.utils.logFileLocation();
     let options = {
@@ -352,8 +361,8 @@ export class HomePage {
     }
 
     if (this.logState == 'Start') {
-
       this.startTrip();
+      
     }
   }
 
@@ -377,6 +386,7 @@ export class HomePage {
         {
           text: 'Ok',
           handler: () => {
+            this.utils.presentToast("clearing log file");
             this.clearArray();
             this.utils.deleteLog();
 
