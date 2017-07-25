@@ -314,6 +314,8 @@ export class HomePage {
 
       this.storeLog('Marker', str);
       this.utils.presentToast(str + ' market set', 'success', 1500);
+      // restart recording if paused
+      if (!this.isLogging()) this.togglePause();
   }
 
   

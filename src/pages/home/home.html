@@ -41,39 +41,53 @@
         <button  ion-button  icon-left (click)="upload()" color="dark"><ion-icon name="cloud-upload"></ion-icon>Upload</button>
       </ion-col> -->
 
-      
+
     </ion-row>
 
     
       <progress-bar   [progress]="progress.val" *ngIf="progress.val!=-1"></progress-bar>
   
     
-    <ion-row wrap *ngIf='logState=="Stop"'>
-      <ion-col>
-        <button ion-button small color="light" (click)="setMarker('pick')">pick</button>
-      </ion-col>
-
-      <ion-col >
-        <button ion-button small color="light" (click)="setMarker('brake')">brake</button>
-      </ion-col>
-
-
-      <ion-col >
-        <button ion-button small color="light" (click)="setMarker('speedup')">speed up</button>
-      </ion-col>
-
-
-      <ion-col >
+    <ion-row wrap [hidden]='logState=="Start"'>
+      <ion-col col-3>
         <button ion-button small color="light" (click)="setMarker('left')">left</button>
       </ion-col>
       
-      <ion-col >
+      <ion-col col-3>
         <button ion-button small color="light" (click)="setMarker('right')">right</button>
       </ion-col>
 
-      <ion-col >
+      <ion-col col-3>
+        <button ion-button small color="light" (click)="setMarker('brake')">brake</button>
+      </ion-col>
+
+       <ion-col col-3>
         <button ion-button small color="light" (click)="setMarker('unknown')">unknown</button>
       </ion-col>
+
+    </ion-row>
+     <ion-row wrap [hidden]='logState=="Start"'>
+      <ion-col col-3>
+        <button ion-button small color="alert" (click)="setMarker('hard-brake')">hard-brake</button>
+      </ion-col>
+
+      <ion-col col-3>
+        <button ion-button small color="alert" (click)="setMarker('distract')">distract</button>
+      </ion-col>
+
+      <ion-col col-3>
+        <button ion-button small color="alert" (click)="setMarker('speedup')">speed up</button>
+      </ion-col>
+
+      <ion-col col-3>
+        <button ion-button small color="alert" (click)="setMarker('hard-left')">hard-left</button>
+      </ion-col>
+      
+      <ion-col col-3>
+        <button ion-button small color="alert" (click)="setMarker('hard-right')">hard-right</button>
+      </ion-col>
+
+
 
 
     </ion-row>
