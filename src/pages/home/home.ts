@@ -10,7 +10,7 @@ import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { Insomnia } from '@ionic-native/insomnia';
 import { CommonUtilsProvider } from '../../providers/common-utils/common-utils';
 import { AlertController } from 'ionic-angular';
-
+import {ViewTripsPage} from "../view-trips/view-trips";
 
 @Component({
   selector: 'page-home',
@@ -70,12 +70,20 @@ export class HomePage {
 
   }
 
+  viewTrips() {
+    console.log ("View Trips");
+    this.navCtrl.push(ViewTripsPage);
+  }
+
   // uploads file to firebase
   upload() {
     console.log("upload");
-    this.utils.cloudUploadWithAuth(this.progress);
-  }
+    this.utils.doAuthWithPrompt()
+    .then (succ => {this.utils.uploadDataToFirebase(this.progress);})
+    .catch (err => {});
 
+  }
+    
   
   // unsubscribe from all sensors once trip ends
   stopAllSensors() {
@@ -291,13 +299,11 @@ export class HomePage {
 
   // this adds 'events' to the log. Use it for analysis - before you perform an action
   // you want to train, set an appropriate marker
+  // allow marker even if paused
   setMarker(str) {
 
-    if (this.isLogging()) {
       this.storeLog('Marker', str);
       this.utils.presentToast(str + ' market set', 'success', 1500);
-    }
-
   }
 
   // currently simply shares via email. No error checking, make sure email is associated

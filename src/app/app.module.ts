@@ -6,6 +6,7 @@ import { StatusBar } from '@ionic-native/status-bar';
 
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
+import { ViewTripsPage } from '../pages/view-trips/view-trips';
 
 import { DeviceMotion } from '@ionic-native/device-motion';
 import { Gyroscope } from '@ionic-native/gyroscope';
@@ -23,6 +24,8 @@ import { ProgressBarComponent } from '../components/progress-bar/progress-bar';
 import { IonicStorageModule } from '@ionic/storage';
 
 
+
+
 // Initialize Firebase
   export const firebaseConfig = {
    apiKey: "AIzaSyCldDUKjFcG0YTS6Oj1n2kn0oT9cFQN878",
@@ -38,6 +41,7 @@ import { IonicStorageModule } from '@ionic/storage';
   declarations: [
     MyApp,
     HomePage,
+    ViewTripsPage,
     ProgressBarComponent
   ],
   imports: [
@@ -51,7 +55,8 @@ import { IonicStorageModule } from '@ionic/storage';
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    HomePage
+    HomePage,
+    ViewTripsPage
   ],
   providers: [
     Geolocation,

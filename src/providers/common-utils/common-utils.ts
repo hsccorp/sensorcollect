@@ -162,34 +162,79 @@ export class CommonUtilsProvider {
     return this.storage.get('user');
   }
 
+  cloudGetTrips() {
+     let ref = firebase.database().ref('tripDataIndex/');
+     let trips:any[] = [];
+     ref.on('value', (snapshot) => {
+       console.log(snapshot.val());
+       let result = snapshot.val();
+       /*for (let k in result) {
+        trips.push({
+          id: k,
+          name: result[k]
+        });
+      }*/
 
-  // upload to firebase
-  cloudUploadWithAuth(prg) {
+     });
+  }
+
+  cloudGetTripsWithAuth() {
     this.getUser()
       .then(user => {
         console.log("Getting " + JSON.stringify(user));
         if (user == undefined || !user.email || !user.password) {
           console.log(" no user defined");
           this.promptForPassword()
-            .then((data) => { this.doAuth(data.email, data.password, prg) })
+            .then((data) => { this.doAuth(data.email, data.password) })
+            .then (succ => {this.cloudGetTrips()});
 
         }
         else { // we have it stored
-          this.doAuth(user.email, user.password, prg);
+          this.doAuth(user.email, user.password)
+          .then (succ => {this.cloudGetTrips()});
+
         }
       })
       .catch(e => { console.log("getUser error" + JSON.stringify(e)) })
 
   }
-  doAuth(u, p, prg) {
-    console.log(`Inside doAuth with ${u}:${p}`);
+
+  
+  doAuthWithPrompt(): Promise <any> {
+      return this.getUser()
+      .then (user => {
+        console.log("Got user:" + JSON.stringify(user));
+        if (user == undefined || !user.email || !user.password) {
+          return this.promptForPassword()
+          .then (data => {
+            return this.doAuth(data.email, data.password);
+          })
+        }
+        else {
+            return this.doAuth(user.email, user.password)
+          };
+        
+      })
+      .catch (e => {return Promise.reject(false);})
+  
+  }
+
+  doAuth(u, p): Promise <any> {
+    return new Promise ((resolve,reject) => {
+      console.log(`Inside doAuth with ${u}:${p}`);
     firebase.auth().signInWithEmailAndPassword(u, p)
-      .then(succ => { console.log("**** Signed in"); this.uploadDataToFirebase(prg); })
+      .then(succ => { console.log("**** Signed in"); 
+      resolve (succ);
+       })
       .catch(error => {
         console.log("Auth Error:" + JSON.stringify(error));
         this.presentToast("Incorrect credentials", "error");
         this.clearUser();
+        reject (error);
       })
+
+    })
+    
   }
 
   // upload trip data to firebase. called by doAuth
@@ -212,7 +257,7 @@ export class CommonUtilsProvider {
         uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
           (snapshot) => {
             let progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-            prg.val = progress;
+           if (prg) prg.val = progress;
 
           },
           (error) => {
