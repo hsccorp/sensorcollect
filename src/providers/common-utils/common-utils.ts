@@ -7,6 +7,8 @@ import { AngularFireDatabaseModule, AngularFireDatabase, FirebaseListObservable 
 import * as firebase from 'firebase/app';
 import 'firebase/storage';
 import { Storage } from '@ionic/storage';
+import { AppVersion } from '@ionic-native/app-version';
+import { Platform } from 'ionic-angular';
 
 
 
@@ -17,15 +19,25 @@ export class CommonUtilsProvider {
   logFile: string = 'triplog.txt';
   timer: any;
   user: {email:string, password:string} = {email:'', password:''};
+  version:string = "undefined";
 
 
-  constructor(public toastCtrl: ToastController, public loadingCtrl: LoadingController, public file: File, public db: AngularFireDatabase, public storage: Storage, public alert: AlertController) {
+  constructor(public toastCtrl: ToastController, public loadingCtrl: LoadingController, public file: File, public db: AngularFireDatabase, public storage: Storage, public alert: AlertController, public appVersion:AppVersion, public plt:Platform) {
+
+    plt.ready().then ( () => {
+      this.appVersion.getVersionNumber()
+      .then (ver => {this.version = ver; console.log ("version="+ver)});
+  
+    })
 
     storage.ready().then(() => {
       console.log("Storage engine is:" + storage.driver)
     })
   }
 
+  getVersion():string {
+    return this.version;
+  }
   // pass -1 to dur for infinite
   presentLoader(text, dur = 6000, remove = true) {
 
@@ -239,7 +251,12 @@ export class CommonUtilsProvider {
             //let key = 'tripDataIndex/'+name;
             //console.log ("key="+key);
             firebase.database().ref('tripDataIndex/').push()
-              .set({ 'url': downloadURL, 'uploadedon': Date(), 'uploadedby': this.user.email, 'name':name })
+              .set({ 'url': downloadURL, 
+                     'uploadedon': Date(), 
+                      'uploadedby': this.user.email, 
+                      'name':name,
+                      'version': this.getVersion()
+                    })
               .catch(err => { console.log("ERROR " + err); this.presentToast("error creating index", "error") })
             this.presentToast("upload complete")
           }

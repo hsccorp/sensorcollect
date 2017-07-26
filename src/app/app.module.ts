@@ -22,7 +22,8 @@ import { AngularFireAuthModule } from 'angularfire2/auth';
 
 import { ProgressBarComponent } from '../components/progress-bar/progress-bar';
 import { IonicStorageModule } from '@ionic/storage';
-
+import { InAppBrowser } from '@ionic-native/in-app-browser';
+import { AppVersion } from '@ionic-native/app-version';
 
 
 
@@ -69,6 +70,8 @@ import { IonicStorageModule } from '@ionic/storage';
     AndroidPermissions,
     CommonUtilsProvider,
     File,
+    InAppBrowser,
+    AppVersion,
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })

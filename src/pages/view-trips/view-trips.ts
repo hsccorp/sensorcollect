@@ -6,6 +6,8 @@ import 'firebase/storage';
 import { NgZone } from '@angular/core';
 import { SocialSharing } from '@ionic-native/social-sharing';
 import { ItemSliding } from 'ionic-angular';
+import { InAppBrowser } from '@ionic-native/in-app-browser';
+
 
 
 @Component({
@@ -16,7 +18,20 @@ export class ViewTripsPage {
   trips:any[] = [];
 
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public utils:CommonUtilsProvider, public zone:NgZone, public socialSharing:SocialSharing) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public utils:CommonUtilsProvider, public zone:NgZone, public socialSharing:SocialSharing, public iab:InAppBrowser) {
+
+  }
+
+  displayTrip(trip,slider) {
+     slider.close();
+     this.utils.presentLoader("loading trip...");
+     const browser = this.iab.create(trip.url, "_blank", "enableViewPortScale=yes,closebuttoncaption=Done");
+
+     browser.on('loadstop').subscribe( resp => {console.log ("STOP");this.utils.removerLoader()});
+     browser.on('loaderror').subscribe( resp => {console.log ("ERROR");this.utils.removerLoader()});
+
+
+     //browser.close();
 
   }
 
@@ -54,7 +69,8 @@ export class ViewTripsPage {
           url: result[k].url,
           date: result[k].uploadedon,
           uploadedby: result[k].uploadedby,
-          name:result[k].name
+          name:result[k].name,
+          version: result[k].version
 
         });
 

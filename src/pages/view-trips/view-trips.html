@@ -23,7 +23,7 @@
       <ion-item >
         {{trip.name}}
         <p>{{trip.date}}</p>
-        <p>{{trip.uploadedby}}</p>
+        <p>{{trip.uploadedby}}, version:{{trip.version}}</p>
       </ion-item>
       <ion-item-options>
           <button ion-button icon-only color="secondary" (click)="share(trip, slidingItem)">

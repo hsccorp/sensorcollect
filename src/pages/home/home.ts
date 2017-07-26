@@ -87,9 +87,13 @@ export class HomePage {
 
   }
 
+  getVersion() {
+    return this.utils.getVersion();
+  }
+  
   viewTrips() {
     console.log ("View Trips");
-    this.navCtrl.push(ViewTripsPage);
+    this.navCtrl.push(ViewTripsPage, {direction:'back'});
   }
 
   // uploads file to firebase
