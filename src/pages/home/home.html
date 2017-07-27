@@ -16,6 +16,7 @@
 </ion-header>
 
 <ion-content>
+  <div *ngIf="isOutdated"><small style="color:#D91E18">New app version available. Please update</small></div>
   <b>Sampling @ {{freq}}ms, logging:{{isLogging()}}</b><small> (v:{{getVersion()}})</small>
   <ion-grid>
     <ion-row> 

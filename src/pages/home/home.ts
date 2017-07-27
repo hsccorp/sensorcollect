@@ -77,19 +77,20 @@ export class HomePage {
   timer = { 'time': "" }; //trip timer
   currentTripName: string = "";
   pendingUpload: boolean = false; // if true, cloud upload failed
-  remoteVer:string = "dsdfsd"; // latest remote app version;
+  remoteVer:string = "0.0.0"; // latest remote app version;
+  isOutdated: boolean; // true if new version av.
 
   // init
   constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController) {
 
     plt.ready().then(() => {
       this.utils.init();
-      this.utils.getRemoteVersion()
-      .then (ver => this.remoteVer = ver)
       this.utils.getPendingUpload()
         .then(succ => { this.pendingUpload = succ.status; this.currentTripName = succ.name; console.log ("PENDING RETURNED "+JSON.stringify(succ)); })
       this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Accelerometer');
       this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
+
+
     });
 
   }
@@ -574,7 +575,16 @@ export class HomePage {
   ionViewDidLoad() {
     // never printed ? needs to be inside plt.ready I bet...
     console.log("*********** LOADED VIEW ");
-
+    this.plt.ready().then(() => {
+      this.utils.getRemoteVersion()
+      .then (ver => {
+        this.remoteVer = ver;
+        let localver = this.utils.getVersion();
+        console.log (`remote: ${this.remoteVer}, local: ${localver}`);
+        let c = this.utils.versionCompare(localver, this.remoteVer);
+        if (c == -1) this.isOutdated = true;
+      })
+    })
   }
 
 }

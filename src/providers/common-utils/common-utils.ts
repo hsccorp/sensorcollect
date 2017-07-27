@@ -38,8 +38,6 @@ export class CommonUtilsProvider {
   }
 
   getRemoteVersion(): Promise <any> {
-
-
     let url = "https://firebasestorage.googleapis.com/v0/b/tripdata-3eb84.appspot.com/o/version%2Fversion.txt?alt=media&token=2fc6d9a5-4423-4b10-b334-70857615d4ba";
     return new Promise((resolve, reject) => {
         this.http.get(url).map(res=>res).subscribe(data => {
@@ -91,8 +89,6 @@ export class CommonUtilsProvider {
 
   // create an empty log file on start if needed
   init() {
-
-    this.getRemoteVersion();
     this.file.checkFile(this.file.dataDirectory, this.logFile)
       .then(succ => { console.log("log file exists"); })
       .catch(_ => { console.log("**CREATING LOG"); this.file.createFile(this.file.dataDirectory, this.logFile, true) });
@@ -109,6 +105,33 @@ export class CommonUtilsProvider {
 
       
   }
+
+
+//credit: https://gist.github.com/alexey-bass/1115557
+versionCompare(left, right)
+{
+    if (typeof left + typeof right != 'stringstring')
+        return false;
+
+    var a = left.split('.');
+    var b = right.split('.');
+    var i = 0;
+    var len = Math.max(a.length, b.length);
+
+    for (; i < len; i++)
+    {
+        if ((a[i] && !b[i] && parseInt(a[i]) > 0) || (parseInt(a[i]) > parseInt(b[i])))
+        {
+            return 1;
+        }
+        else if ((b[i] && !a[i] && parseInt(b[i]) > 0) || (parseInt(a[i]) < parseInt(b[i])))
+        {
+            return -1;
+        }
+    }
+
+    return 0;
+}
 
   // write a text string to the logs - used for headers
   writeString(str) {

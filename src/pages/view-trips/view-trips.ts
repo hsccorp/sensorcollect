@@ -114,7 +114,8 @@ export class ViewTripsPage {
 
       })
 
-    });
+    },
+    (error)=>{this.utils.removerLoader();this.utils.presentToast("Error accessing data","error")});
   }
 
   // authenticates and then downloads
