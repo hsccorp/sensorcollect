@@ -82,7 +82,7 @@ export class HomePage {
     plt.ready().then(() => {
       this.utils.initLog();
       this.utils.getPendingUpload()
-      .then(succ=>this.pendingUpload = succ);
+      .then(succ=>this.pendingUpload = succ)
       this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Accelerometer');
       this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
     });
@@ -390,6 +390,38 @@ export class HomePage {
   }
 
 
+ checkPendingUpload(): Promise <any> {
+
+   return new Promise((resolve, reject) => {
+
+    if (this.pendingUpload)
+    {
+      let alert = this.alert.create({
+      title: 'Confirm',
+      message: 'This will delete current unsaved trip',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => {
+            console.log('Cancel clicked');
+            reject (false);
+          }
+        },
+        {
+          text: 'Ok',
+          handler: () => {
+           resolve(true);
+
+          }
+        }
+      ]
+    });
+    alert.present();   
+    }
+   })
+
+  }
 
   toggleTrip() {
     if (this.logState == 'Stop') {
@@ -398,8 +430,9 @@ export class HomePage {
     }
 
     if (this.logState == 'Start') {
-      this.startTrip();
-      
+      this.checkPendingUpload()
+      .then (succ=>this.startTrip())
+      .catch (_=>console.log ("Not starting a trip"))
     }
   }
 
