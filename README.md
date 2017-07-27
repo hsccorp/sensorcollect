@@ -1,4 +1,4 @@
-an app to collect sensor data in a mobile app. Meant to be used while in a car. I am currently logging accelerometer, gyroscope and GPS data.
+an app to collect sensor data in a mobile app. Meant to be used while in a car. Currently logging accelerometer, gyroscope and GPS data.
 
 In addition to collecting data, I'm also logging a simple heuristic of tracking the accelerometer's Z-axis. Assuming you move the phone forward when peeking, z-axis seems to be the best indication so far.
 
@@ -16,8 +16,6 @@ Usage
 * If upload fails (maybe you are not online), a new "upload" button will show up for deferred upload
 * Tap on the "list" icon on top right of navbar to view uploaded trips, slide to share/delete
 * "Share" lets you share the latest trip file with others 
-
-
 
 Screenshots
 ------------

@@ -84,6 +84,7 @@ export class ViewTripsPage {
   // iterates firebase and retrieves last 300 trips
   // should be enough
 
+  // TBD: Handle offline error
   cloudGetTrips() {
     this.utils.presentLoader("retrieving trips...", 60000);
     let ref = firebase.database().ref('tripDataIndex/');
@@ -110,6 +111,7 @@ export class ViewTripsPage {
       this.zone.run(() => {
         this.trips = ltrips;
         this.utils.removerLoader();
+
       })
 
     });

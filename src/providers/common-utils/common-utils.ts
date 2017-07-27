@@ -225,7 +225,7 @@ export class CommonUtilsProvider {
         })
         .catch(error => {
           console.log("Auth Error:" + JSON.stringify(error));
-          this.presentToast("Error uploading", "error");
+          this.presentToast(error["code"], "error");
           this.clearUser();
           reject(error);
         })
