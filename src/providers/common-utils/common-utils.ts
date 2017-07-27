@@ -9,6 +9,8 @@ import 'firebase/storage';
 import { Storage } from '@ionic/storage';
 import { AppVersion } from '@ionic-native/app-version';
 import { Platform } from 'ionic-angular';
+import { Http } from '@angular/http';
+import 'rxjs/add/operator/map';
 
 // TBD: firebase stuff is here too - need to move it out to its own service
 
@@ -22,7 +24,7 @@ export class CommonUtilsProvider {
   version: string = "undefined";
 
 
-  constructor(public toastCtrl: ToastController, public loadingCtrl: LoadingController, public file: File, public db: AngularFireDatabase, public storage: Storage, public alert: AlertController, public appVersion: AppVersion, public plt: Platform) {
+  constructor(public toastCtrl: ToastController, public loadingCtrl: LoadingController, public file: File, public db: AngularFireDatabase, public storage: Storage, public alert: AlertController, public appVersion: AppVersion, public plt: Platform, public http:Http) {
 
     plt.ready().then(() => {
       this.appVersion.getVersionNumber()
@@ -33,6 +35,22 @@ export class CommonUtilsProvider {
     storage.ready().then(() => {
       console.log("Storage engine is:" + storage.driver)
     })
+  }
+
+  getRemoteVersion(): Promise <any> {
+
+
+    let url = "https://firebasestorage.googleapis.com/v0/b/tripdata-3eb84.appspot.com/o/version%2Fversion.txt?alt=media&token=2fc6d9a5-4423-4b10-b334-70857615d4ba";
+    return new Promise((resolve, reject) => {
+        this.http.get(url).map(res=>res).subscribe(data => {
+            let ver = data["_body"];
+            console.log ("Latest app version:"+ver);
+            resolve(ver);
+        },
+          err => {console.log ("Latest App version error:"+JSON.stringify(err)); reject(err);}
+        
+      );
+    });
   }
 
   // returns app version
@@ -72,7 +90,9 @@ export class CommonUtilsProvider {
   }
 
   // create an empty log file on start if needed
-  initLog() {
+  init() {
+
+    this.getRemoteVersion();
     this.file.checkFile(this.file.dataDirectory, this.logFile)
       .then(succ => { console.log("log file exists"); })
       .catch(_ => { console.log("**CREATING LOG"); this.file.createFile(this.file.dataDirectory, this.logFile, true) });

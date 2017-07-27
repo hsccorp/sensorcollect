@@ -12,6 +12,8 @@ import { CommonUtilsProvider } from '../../providers/common-utils/common-utils';
 import { AlertController } from 'ionic-angular';
 import { ViewTripsPage } from "../view-trips/view-trips";
 
+
+
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
@@ -75,12 +77,15 @@ export class HomePage {
   timer = { 'time': "" }; //trip timer
   currentTripName: string = "";
   pendingUpload: boolean = false; // if true, cloud upload failed
+  remoteVer:string = "dsdfsd"; // latest remote app version;
 
   // init
   constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController) {
 
     plt.ready().then(() => {
-      this.utils.initLog();
+      this.utils.init();
+      this.utils.getRemoteVersion()
+      .then (ver => this.remoteVer = ver)
       this.utils.getPendingUpload()
         .then(succ => { this.pendingUpload = succ.status; this.currentTripName = succ.name; console.log ("PENDING RETURNED "+JSON.stringify(succ)); })
       this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Accelerometer');

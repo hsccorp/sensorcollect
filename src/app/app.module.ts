@@ -24,6 +24,7 @@ import { ProgressBarComponent } from '../components/progress-bar/progress-bar';
 import { IonicStorageModule } from '@ionic/storage';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { AppVersion } from '@ionic-native/app-version';
+import { HttpModule } from '@angular/http';
 
 
 
@@ -51,6 +52,7 @@ import { AppVersion } from '@ionic-native/app-version';
     AngularFireAuthModule,
     BrowserModule,
     IonicModule.forRoot(MyApp),
+    HttpModule,
     IonicStorageModule.forRoot({name:'__tripDB', driverOrder:['sqlite','websql','indexeddb']})
   ],
   bootstrap: [IonicApp],
