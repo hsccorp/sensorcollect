@@ -32,7 +32,7 @@ export class HomePage {
   {name:'right', val:'right', color:'light'},
   {name:'brake', val:'brake', color:'light'},
   {name:'unknown', val:'unknown', color:'light'},
-  // bad maerkers
+  // bad markers
   {name:'brake', val:'hard-brake', color:'alert'},
   {name:'distract', val:'distract', color:'alert'},
   {name:'speedup', val:'speedup', color:'alert'},
@@ -61,20 +61,20 @@ export class HomePage {
   stateColor: string = 'primary'; // button color
   logs: any[] = []; // will hold history of acc + gyr data
   logRows: number = 0;
-  freq: number = 500;
+  freq: number = 500; // sampling freq for gps/gyr
   viewMode: string = 'graph'; // controls segment display
   dirty: boolean = true; // hack for graph DOM attachment
-  mLastAcc: number = 0;
-  mCurrAcc: number = 0;
-  mAcc: number = 0;
+  mLastAcc: number = 0; // not used, really
+  mCurrAcc: number = 0; // not used, really
+  mAcc: number = 0; // not used, really
   move: string = "no "; // heuristic to calc. if we picked up phone
-  oldZ: number = -1000;
+  oldZ: number = -1000; // stores past Z axis val in acc (for distract analytics)
   moveCount: number = 0; // times you 'saw' the phone in a trip
   moveThreshold: number = 3; // tweak this for above sensitivity
   speed: number = 0; // holds GPS speed if applicable
   timer = { 'time': "" }; //trip timer
   currentTripName:string ="";
-  pendingUpload:boolean = false;
+  pendingUpload:boolean = false; // if true, cloud upload failed
 
   // init
   constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController) {
@@ -109,7 +109,6 @@ export class HomePage {
     })
   }
     
-  
   // unsubscribe from all sensors once trip ends
   stopAllSensors() {
     try {
@@ -141,8 +140,6 @@ export class HomePage {
 
     this.perm.checkPermission(this.perm.PERMISSION.ACCESS_FINE_LOCATION).then(
       success => { this.latchGPS(); }, err => { this.utils.presentToast("Error latching to GPS", "error"); });
-
-
   }
 
   // attaches to the GPS and logs readings, for speeds
@@ -155,9 +152,7 @@ export class HomePage {
           // this is meters per sec, convert to mph
           this.speed = data.coords.speed * 2.23694;
           if (this.isLogging()) { this.storeLog('gps', data.coords); }
-
         }
-
       });
   }
 
@@ -165,14 +160,13 @@ export class HomePage {
   toggleButtonState() {
     this.logState = (this.logState == 'Start') ? 'Stop' : 'Start';
     this.stateColor = (this.logState == 'Start') ? 'primary' : 'danger';
-    console.log("******* BUTTON IS NOW " + this.logState);
   }
 
+  // pauses recording without stopping trips
   togglePause() {
     this.pause = !this.pause;
     this.pauseColor = (this.pauseColor == 'dark') ? 'primary': 'dark';
   }
-
 
   // init code to start a trip
   startTrip() {
@@ -275,8 +269,6 @@ export class HomePage {
   // given a sensor object, updates graph and log 
   process(object, chart, type) {
     if (!this.dirty) { // let's make sure there is no race when chart is re-creating
-      //console.log("Pushing "+type+":" + object.x);
-
       chart.data.datasets[0].data.shift();
       chart.data.datasets[0].data.push(object.x);
       chart.data.labels.shift();
@@ -289,7 +281,8 @@ export class HomePage {
       chart.data.datasets[2].data.push(object.z);
       chart.data.labels.shift();
       chart.data.labels.push("");
-
+      // I don't think zone.run will work here
+      // we need time for the view to render first?
       setTimeout(() => {
         chart.update();
       }, 100);
@@ -300,7 +293,6 @@ export class HomePage {
 
     if (type == 'acc') // accelerometer
     {
-
       this.acc = JSON.stringify(object);
       this.mLastAcc = this.mCurrAcc;
       this.mCurrAcc = Math.sqrt(object.x * object.x + object.y * object.y + object.z * object.z);
@@ -322,7 +314,6 @@ export class HomePage {
       else {
         this.move = 'no ';
       }
-
       this.oldZ = object.z;
 
       if (this.isLogging()) { this.storeLog('Acc', object); }
@@ -344,16 +335,16 @@ export class HomePage {
 
   // this adds 'events' to the log. Use it for analysis - before you perform an action
   // you want to train, set an appropriate marker
-  // allow marker even if paused
+  // allow marker even if paused. if paused, start.
   setMarker(str) {
-
       this.storeLog('Marker', str);
       this.utils.presentToast(str + ' market set', 'success', 1500);
       // restart recording if paused
       if (!this.isLogging()) this.togglePause();
   }
 
-  
+
+  // shares latest trip
   share() {
     let f = this.utils.logFileLocation();
     let options = {
@@ -390,8 +381,8 @@ export class HomePage {
   }
 
 
+// before trip is started, lets check if there is a pending trip to upload
  checkPendingUpload(): Promise <any> {
-
    return new Promise((resolve, reject) => {
 
     if (this.pendingUpload)
@@ -423,6 +414,7 @@ export class HomePage {
 
   }
 
+  // called by UI
   toggleTrip() {
     if (this.logState == 'Stop') {
       // write to file if stopped
@@ -441,6 +433,7 @@ export class HomePage {
     this.logRows = 0;
   }
 
+  // not used  - I removed delete - no sense now that logs are not cumulative
   confirmDelete() {
     let alert = this.alert.create({
       title: 'Confirm Deletion',
@@ -467,9 +460,10 @@ export class HomePage {
     alert.present();
   }
 
+  // given that DOM elements are removed on switching segments
+  // we need to redraw/reattach charts
 
   segmentClicked() {
-    console.log("SEGMENT CLICKED");
     this.utils.presentLoader("charting graph..");
     this.dirty = true;
     this.charts.accChart.destroy();
@@ -545,13 +539,11 @@ export class HomePage {
       charthandle.accChart = chart;
     else
       charthandle.gyroChart = chart;
-
-
-
     this.dirty = false;
   }
 
   ionViewDidLoad() {
+    // never printed ? needs to be inside plt.ready I bet...
     console.log("*********** LOADED VIEW ");
 
   }
