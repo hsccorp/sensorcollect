@@ -10,7 +10,7 @@ import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { Insomnia } from '@ionic-native/insomnia';
 import { CommonUtilsProvider } from '../../providers/common-utils/common-utils';
 import { AlertController } from 'ionic-angular';
-import {ViewTripsPage} from "../view-trips/view-trips";
+import { ViewTripsPage } from "../view-trips/view-trips";
 
 @Component({
   selector: 'page-home',
@@ -26,20 +26,20 @@ export class HomePage {
   // modify these to make your own markers
   // name = what is displayed as a button
   // val = what is written in the log
-   markers = [
-  //  good markers
-  {name:'left', val:'left', color:'light'},
-  {name:'right', val:'right', color:'light'},
-  {name:'brake', val:'brake', color:'light'},
-  {name:'unknown', val:'unknown', color:'light'},
-  // bad markers
-  {name:'brake', val:'hard-brake', color:'alert'},
-  {name:'distract', val:'distract', color:'alert'},
-  {name:'speedup', val:'speedup', color:'alert'},
-  {name:'left', val:'hard-left', color:'alert'},
-  {name:'right', val:'hard-right', color:'alert'},
+  markers = [
+    //  good markers
+    { name: 'left', val: 'left', color: 'light' },
+    { name: 'right', val: 'right', color: 'light' },
+    { name: 'brake', val: 'brake', color: 'light' },
+    { name: 'unknown', val: 'unknown', color: 'light' },
+    // bad markers
+    { name: 'brake', val: 'hard-brake', color: 'alert' },
+    { name: 'distract', val: 'distract', color: 'alert' },
+    { name: 'speedup', val: 'speedup', color: 'alert' },
+    { name: 'left', val: 'hard-left', color: 'alert' },
+    { name: 'right', val: 'hard-right', color: 'alert' },
 
-]
+  ]
 
   // handles to DOM for graphs
   @ViewChild('acc') accCanvas;
@@ -56,8 +56,8 @@ export class HomePage {
   acc: any;  // latest accelerometer data
   gyro: any; // latest gyro data
   logState: string = 'Start'; // button state
-  pause:boolean = false; // true if recording paused
-  pauseColor:string = 'dark';
+  pause: boolean = false; // true if recording paused
+  pauseColor: string = 'dark';
   stateColor: string = 'primary'; // button color
   logs: any[] = []; // will hold history of acc + gyr data
   logRows: number = 0;
@@ -73,8 +73,8 @@ export class HomePage {
   moveThreshold: number = 3; // tweak this for above sensitivity
   speed: number = 0; // holds GPS speed if applicable
   timer = { 'time': "" }; //trip timer
-  currentTripName:string ="";
-  pendingUpload:boolean = false; // if true, cloud upload failed
+  currentTripName: string = "";
+  pendingUpload: boolean = false; // if true, cloud upload failed
 
   // init
   constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController) {
@@ -82,7 +82,7 @@ export class HomePage {
     plt.ready().then(() => {
       this.utils.initLog();
       this.utils.getPendingUpload()
-      .then(succ=>this.pendingUpload = succ)
+        .then(succ => { this.pendingUpload = succ.status; this.currentTripName = succ.name; console.log ("PENDING RETURNED "+JSON.stringify(succ)); })
       this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Accelerometer');
       this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
     });
@@ -93,22 +93,40 @@ export class HomePage {
   getVersion() {
     return this.utils.getVersion();
   }
-  
+
   // loads view trip controller
   viewTrips() {
-    console.log ("View Trips");
-    this.navCtrl.push(ViewTripsPage, {animate:'true', direction:'back'});
+    console.log("View Trips");
+    this.navCtrl.push(ViewTripsPage, { animate: 'true', direction: 'back' });
   }
 
+  uploadPending(name) {
+
+    this.upload(this.currentTripName)
+          .then(succ => {
+            console.log("all good with upload");
+            this.utils.setPendingUpload(false);
+            this.pendingUpload = false;
+          })
+          .catch(err => {
+            console.log("bubble up: upload failed");
+            this.utils.setPendingUpload(true, this.currentTripName);
+
+            this.pendingUpload = true;
+
+          })
+
+
+  }
   // uploads file to firebase
-  upload(name): Promise <any> {
+  upload(name): Promise<any> {
     console.log("upload");
     return this.utils.doAuthWithPrompt()
-    .then (succ => {
-      return this.utils.uploadDataToFirebase(name,this.progress);
-    })
+      .then(succ => {
+        return this.utils.uploadDataToFirebase(name, this.progress);
+      })
   }
-    
+
   // unsubscribe from all sensors once trip ends
   stopAllSensors() {
     try {
@@ -165,7 +183,7 @@ export class HomePage {
   // pauses recording without stopping trips
   togglePause() {
     this.pause = !this.pause;
-    this.pauseColor = (this.pauseColor == 'dark') ? 'primary': 'dark';
+    this.pauseColor = (this.pauseColor == 'dark') ? 'primary' : 'dark';
   }
 
   // init code to start a trip
@@ -191,23 +209,23 @@ export class HomePage {
       {
         text: 'Ok',
         handler: data => {
-        this.clearArray(); // remove array
-        this.utils.deleteLog() // remove log file
-        .then (_=>{
-          // start new log and start trip
-          this.currentTripName = data.name || 'unnamed trip';
-          this.startTripHeader(this.currentTripName);
-          this.toggleButtonState();
-          this.utils.presentToast("trip recording started");
-          this.startAllSensors();
-          this.utils.startTimer(this.timer);
-          // make sure screen stays awake
-          this.insomnia.keepAwake()
-            .then((succ) => { console.log("*** POWER OK **") })
-            .catch((err) => { this.utils.presentToast("could not grab wakelock, screen will dim", "error"); });
-        })
-        .catch (err=>{this.utils.presentToast('problem removing log file', 'error');})
-      
+          this.clearArray(); // remove array
+          this.utils.deleteLog() // remove log file
+            .then(_ => {
+              // start new log and start trip
+              this.currentTripName = data.name || 'unnamed trip';
+              this.startTripHeader(this.currentTripName);
+              this.toggleButtonState();
+              this.utils.presentToast("trip recording started");
+              this.startAllSensors();
+              this.utils.startTimer(this.timer);
+              // make sure screen stays awake
+              this.insomnia.keepAwake()
+                .then((succ) => { console.log("*** POWER OK **") })
+                .catch((err) => { this.utils.presentToast("could not grab wakelock, screen will dim", "error"); });
+            })
+            .catch(err => { this.utils.presentToast('problem removing log file', 'error'); })
+
         },
       }],
     });
@@ -234,17 +252,18 @@ export class HomePage {
         this.toggleButtonState();
         this.utils.presentToast("trip recording stopped");
         this.upload(this.currentTripName)
-        .then (succ=> {
-          console.log ("all good with upload");
-          this.utils.setPendingUpload(false);
-          this.pendingUpload = false;
-        })
-        .catch (err=> {
-          console.log ("bubble up: upload failed");
-          this.utils.setPendingUpload(true);
-          this.pendingUpload = true;
-      
-      })
+          .then(succ => {
+            console.log("all good with upload");
+            this.utils.setPendingUpload(false);
+            this.pendingUpload = false;
+          })
+          .catch(err => {
+            console.log("bubble up: upload failed");
+            this.utils.setPendingUpload(true, this.currentTripName);
+
+            this.pendingUpload = true;
+
+          })
 
         //this.utils.cloudUpload(this.progress);
       }, (error) => (console.log(error)));
@@ -337,10 +356,10 @@ export class HomePage {
   // you want to train, set an appropriate marker
   // allow marker even if paused. if paused, start.
   setMarker(str) {
-      this.storeLog('Marker', str);
-      this.utils.presentToast(str + ' market set', 'success', 1500);
-      // restart recording if paused
-      if (!this.isLogging()) this.togglePause();
+    this.storeLog('Marker', str);
+    this.utils.presentToast(str + ' market set', 'success', 1500);
+    // restart recording if paused
+    if (!this.isLogging()) this.togglePause();
   }
 
 
@@ -381,36 +400,40 @@ export class HomePage {
   }
 
 
-// before trip is started, lets check if there is a pending trip to upload
- checkPendingUpload(): Promise <any> {
-   return new Promise((resolve, reject) => {
+  // before trip is started, lets check if there is a pending trip to upload
+  checkPendingUpload(): Promise<any> {
+    return new Promise((resolve, reject) => {
 
-    if (this.pendingUpload)
-    {
-      let alert = this.alert.create({
-      title: 'Confirm',
-      message: 'This will delete current unsaved trip',
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-          handler: () => {
-            console.log('Cancel clicked');
-            reject (false);
-          }
-        },
-        {
-          text: 'Ok',
-          handler: () => {
-           resolve(true);
+      console.log("PENDING = " + this.pendingUpload);
 
-          }
-        }
-      ]
-    });
-    alert.present();   
-    }
-   })
+      if (this.pendingUpload) {
+        let alert = this.alert.create({
+          title: 'Confirm',
+          message: 'This will delete current unsaved trip',
+          buttons: [
+            {
+              text: 'Cancel',
+              role: 'cancel',
+              handler: () => {
+                console.log('Cancel clicked');
+                reject(false);
+              }
+            },
+            {
+              text: 'Ok',
+              handler: () => {
+                resolve(true);
+
+              }
+            }
+          ]
+        });
+        alert.present();
+      }
+      else {
+        resolve(true);
+      }
+    })
 
   }
 
@@ -421,10 +444,11 @@ export class HomePage {
       this.stopTrip();
     }
 
+
     if (this.logState == 'Start') {
       this.checkPendingUpload()
-      .then (succ=>this.startTrip())
-      .catch (_=>console.log ("Not starting a trip"))
+        .then(succ => this.startTrip())
+        .catch(_ => console.log("Not starting a trip"))
     }
   }
 

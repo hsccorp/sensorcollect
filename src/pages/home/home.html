@@ -16,7 +16,7 @@
 </ion-header>
 
 <ion-content>
-  <b>Sampling @ {{freq}}ms, logging:{{isLogging()}}</b><small>(v:{{getVersion()}})</small>
+  <b>Sampling @ {{freq}}ms, logging:{{isLogging()}}</b><small> (v:{{getVersion()}})</small>
   <ion-grid>
     <ion-row> 
       <ion-col> <!-- start/stip trip -->
@@ -32,7 +32,7 @@
       </ion-col>
 
       <ion-col [hidden] = "logState=='Stop' || !pendingUpload"> <!-- upload if cloud upload failed -->
-        <button  ion-button  icon-left (click)="upload()" color="dark"><ion-icon name="cloud-upload"></ion-icon>Upload</button>
+        <button  ion-button  icon-left (click)="uploadPending(currentTripName)" color="dark"><ion-icon name="cloud-upload"></ion-icon>Upload</button>
       </ion-col>
     </ion-row>
     <!-- upload progress, activates during upload -->

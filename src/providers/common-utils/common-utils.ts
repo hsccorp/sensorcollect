@@ -182,8 +182,9 @@ export class CommonUtilsProvider {
     return this.storage.get('user');
   }
 
-  setPendingUpload(val): Promise <any> {
-    return this.storage.set ('pendingUpload', val)
+  setPendingUpload(status,name=""): Promise <any> {
+    console.log ("Pending called with "+status+" " + name);
+    return this.storage.set ('pendingUpload', {status:status, name:name})
   }
 
   getPendingUpload(): Promise <any> {
@@ -263,7 +264,7 @@ export class CommonUtilsProvider {
             this.presentToast("upload error", "error")
             reject (error)
           },
-          () => {
+          () => { // over
             prg.val = 100;
             setTimeout(() => { prg.val = -1; }, 500);
             // write download URL to realtime DB so we can iter it later
@@ -281,9 +282,9 @@ export class CommonUtilsProvider {
                 'version': this.getVersion(),
                 'storageRef': `tripdata/${name}.txt`
               })
-              .then (succ=>resolve(succ))
+              .then (succ=>{this.presentToast("upload complete");resolve(succ)})
               .catch(err => { console.log("ERROR " + err); this.presentToast("error creating index", "error"); reject (err) })
-            this.presentToast("upload complete")
+            
           }
         )
       })
