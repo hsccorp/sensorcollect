@@ -34,10 +34,10 @@
         <button ion-button icon-left (click)="share()" color="secondary"><ion-icon name="share"></ion-icon>Share</button>
       </ion-col>
 
-      <!--
-      <ion-col [hidden] = "logState=='Stop'">
+      
+      <ion-col [hidden] = "logState=='Stop' || !pendingUpload">
         <button  ion-button  icon-left (click)="upload()" color="dark"><ion-icon name="cloud-upload"></ion-icon>Upload</button>
-      </ion-col> -->
+      </ion-col>
 
 
     </ion-row>

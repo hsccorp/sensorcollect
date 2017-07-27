@@ -5,33 +5,38 @@
   Ionic pages and navigation.
 -->
 <ion-header>
-
   <ion-navbar>
     <ion-title>View Trips</ion-title>
   </ion-navbar>
-
 </ion-header>
 
 
 <ion-content padding>
-
   <ion-list nolines>
+     <ion-item *ngIf = "trips.length">
+      <p text-wrap *ngIf="trips.length">swipe items for options</p>
+    </ion-item>
     <ion-item *ngIf="!trips.length">
       No trips found
     </ion-item>
-    <ion-item-sliding #slidingItem *ngFor = "let trip of trips" (click)="displayTrip(trip, slidingItem)">
-      <ion-item >
+    <ion-item-sliding #slidingItem *ngFor="let trip of trips">
+      <ion-item>
         {{trip.name}}
         <p>{{trip.date}}</p>
         <p>{{trip.uploadedby}}, version:{{trip.version}}</p>
       </ion-item>
       <ion-item-options>
-          <button ion-button icon-only color="secondary" (click)="share(trip, slidingItem)">
-               <ion-icon name="share"></ion-icon>Share&nbsp;</button>
+        <button ion-button icon-only color="light" (click)="displayTrip(trip, slidingItem)">
+               <ion-icon name="eye">view</ion-icon>
+          </button>
+        <button ion-button icon-only color="secondary" (click)="share(trip, slidingItem)">
+               <ion-icon name="share">share</ion-icon>
+          </button>
+        <button ion-button icon-only color="danger" (click)="delete(trip, slidingItem)">
+               <ion-icon name="trash">delete</ion-icon>
+          </button>
       </ion-item-options>
     </ion-item-sliding>
-    <ion-item>
-    <p text-wrap *ngIf="trips.length">swipe items for options</p>
-  </ion-item>
+   
   </ion-list>
 </ion-content>

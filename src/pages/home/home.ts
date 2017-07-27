@@ -17,22 +17,22 @@ import {ViewTripsPage} from "../view-trips/view-trips";
   templateUrl: 'home.html'
 })
 
-
-
 export class HomePage {
-
-
   // will hold subscriptions to sensors
   gpsSub: any = null;
   accSub: any = null;
   gyrSub: any = null;
 
+  // modify these to make your own markers
+  // name = what is displayed as a button
+  // val = what is written in the log
    markers = [
+  //  good markers
   {name:'left', val:'left', color:'light'},
   {name:'right', val:'right', color:'light'},
   {name:'brake', val:'brake', color:'light'},
   {name:'unknown', val:'unknown', color:'light'},
-
+  // bad maerkers
   {name:'brake', val:'hard-brake', color:'alert'},
   {name:'distract', val:'distract', color:'alert'},
   {name:'speedup', val:'speedup', color:'alert'},
@@ -74,35 +74,39 @@ export class HomePage {
   speed: number = 0; // holds GPS speed if applicable
   timer = { 'time': "" }; //trip timer
   currentTripName:string ="";
-
+  pendingUpload:boolean = false;
 
   // init
   constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController) {
 
     plt.ready().then(() => {
       this.utils.initLog();
+      this.utils.getPendingUpload()
+      .then(succ=>this.pendingUpload = succ);
       this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Accelerometer');
       this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
     });
 
   }
 
+  // returns app version
   getVersion() {
     return this.utils.getVersion();
   }
   
+  // loads view trip controller
   viewTrips() {
     console.log ("View Trips");
-    this.navCtrl.push(ViewTripsPage, {direction:'back'});
+    this.navCtrl.push(ViewTripsPage, {animate:'true', direction:'back'});
   }
 
   // uploads file to firebase
-  upload(name) {
+  upload(name): Promise <any> {
     console.log("upload");
-    this.utils.doAuthWithPrompt()
-    .then (succ => {this.utils.uploadDataToFirebase(name,this.progress);})
-    .catch (err => {});
-
+    return this.utils.doAuthWithPrompt()
+    .then (succ => {
+      return this.utils.uploadDataToFirebase(name,this.progress);
+    })
   }
     
   
@@ -228,7 +232,6 @@ export class HomePage {
       .catch((err) => { console.log("Error, releasing wake lock:" + err) });
 
     try {
-
       this.flushLog().then(_ => {
         let str = "]}\n";
         console.log("STOPPING TRIP, writing " + str);
@@ -236,7 +239,19 @@ export class HomePage {
         this.clearArray();
         this.toggleButtonState();
         this.utils.presentToast("trip recording stopped");
-        this.upload(this.currentTripName);
+        this.upload(this.currentTripName)
+        .then (succ=> {
+          console.log ("all good with upload");
+          this.utils.setPendingUpload(false);
+          this.pendingUpload = false;
+        })
+        .catch (err=> {
+          console.log ("bubble up: upload failed");
+          this.utils.setPendingUpload(true);
+          this.pendingUpload = true;
+      
+      })
+
         //this.utils.cloudUpload(this.progress);
       }, (error) => (console.log(error)));
     }

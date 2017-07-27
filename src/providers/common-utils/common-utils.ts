@@ -10,7 +10,7 @@ import { Storage } from '@ionic/storage';
 import { AppVersion } from '@ionic-native/app-version';
 import { Platform } from 'ionic-angular';
 
-
+// TBD: firebase stuff is here too - need to move it out to its own service
 
 @Injectable()
 export class CommonUtilsProvider {
@@ -18,16 +18,16 @@ export class CommonUtilsProvider {
   loader: any;
   logFile: string = 'triplog.txt';
   timer: any;
-  user: {email:string, password:string} = {email:'', password:''};
-  version:string = "undefined";
+  user: { email: string, password: string } = { email: '', password: '' };
+  version: string = "undefined";
 
 
-  constructor(public toastCtrl: ToastController, public loadingCtrl: LoadingController, public file: File, public db: AngularFireDatabase, public storage: Storage, public alert: AlertController, public appVersion:AppVersion, public plt:Platform) {
+  constructor(public toastCtrl: ToastController, public loadingCtrl: LoadingController, public file: File, public db: AngularFireDatabase, public storage: Storage, public alert: AlertController, public appVersion: AppVersion, public plt: Platform) {
 
-    plt.ready().then ( () => {
+    plt.ready().then(() => {
       this.appVersion.getVersionNumber()
-      .then (ver => {this.version = ver; console.log ("version="+ver)});
-  
+        .then(ver => { this.version = ver; console.log("version=" + ver) });
+
     })
 
     storage.ready().then(() => {
@@ -35,7 +35,8 @@ export class CommonUtilsProvider {
     })
   }
 
-  getVersion():string {
+  // returns app version
+  getVersion(): string {
     return this.version;
   }
   // pass -1 to dur for infinite
@@ -70,11 +71,23 @@ export class CommonUtilsProvider {
     toast.present();
   }
 
-// create an empty log file on start if needed
+  // create an empty log file on start if needed
   initLog() {
     this.file.checkFile(this.file.dataDirectory, this.logFile)
       .then(succ => { console.log("log file exists"); })
       .catch(_ => { console.log("**CREATING LOG"); this.file.createFile(this.file.dataDirectory, this.logFile, true) });
+
+      this.getPendingUpload()
+      .then (succ=> {
+        if (succ == undefined)
+          {
+            console.log ("CLEARING PENDING");
+            this.setPendingUpload(false);
+          }
+
+      })
+
+      
   }
 
   // write a text string to the logs - used for headers
@@ -106,7 +119,6 @@ export class CommonUtilsProvider {
 
   // start a trip timer
   startTimer(timer) {
-
     this.timer = Observable.interval(1000)
       .subscribe(x => { timer.time = "(" + moment.utc(x * 1000).format("HH:mm:ss") + ")"; });
   }
@@ -114,7 +126,6 @@ export class CommonUtilsProvider {
 
   // stop trip timer
   stopTimer(timer) {
-
     this.timer.unsubscribe();
     timer.time = "";
   }
@@ -122,9 +133,7 @@ export class CommonUtilsProvider {
   // if the app user has not provided credentials for firebase DB, this will ask
   // for it. 
   promptForPassword(): Promise<any> {
-
     return new Promise((resolve, reject) => {
-
       let alert = this.alert.create({
         title: 'Database authorization',
         message: 'Please enter database password',
@@ -173,56 +182,69 @@ export class CommonUtilsProvider {
     return this.storage.get('user');
   }
 
-  
+  setPendingUpload(val): Promise <any> {
+    return this.storage.set ('pendingUpload', val)
+  }
 
-  
-  doAuthWithPrompt(): Promise <any> {
-      return this.getUser()
-      .then (user => {
+  getPendingUpload(): Promise <any> {
+    return this.storage.get ('pendingUpload')    
+  }
+
+  getCachedUser() {
+    return this.user;
+  }
+
+  doAuthWithPrompt(): Promise<any> {
+    return this.getUser()
+      .then(user => {
         console.log("Got user:" + JSON.stringify(user));
         if (user == undefined || !user.email || !user.password) {
           return this.promptForPassword()
-          .then (data => {
-            return this.doAuth(data.email, data.password);
-          })
+            .then(data => {
+              return this.doAuth(data.email, data.password);
+            })
         }
         else {
-            return this.doAuth(user.email, user.password)
-          };
-        
+          return this.doAuth(user.email, user.password)
+        };
+
       })
-      .catch (e => {return Promise.reject(false);})
-  
+      .catch(e => { return Promise.reject(false); })
+
   }
 
-  doAuth(u, p): Promise <any> {
-    return new Promise ((resolve,reject) => {
+  doAuth(u, p): Promise<any> {
+    return new Promise((resolve, reject) => {
       console.log(`Inside doAuth with ${u}:${p}`);
       this.user.email = u;
       this.user.password = p;
-    firebase.auth().signInWithEmailAndPassword(u, p)
-      .then(succ => { console.log("**** Signed in"); 
-      resolve (succ);
-       })
-      .catch(error => {
-        console.log("Auth Error:" + JSON.stringify(error));
-        this.presentToast("Incorrect credentials", "error");
-        this.clearUser();
-        reject (error);
-      })
+      firebase.auth().signInWithEmailAndPassword(u, p)
+        .then(succ => {
+          console.log("**** Signed in");
+          resolve(succ);
+        })
+        .catch(error => {
+          console.log("Auth Error:" + JSON.stringify(error));
+          this.presentToast("Error uploading", "error");
+          this.clearUser();
+          reject(error);
+        })
 
     })
-    
+
   }
 
   // upload trip data to firebase. called by doAuth
   // after all auth validation is done
-  uploadDataToFirebase(name,prg) {
-    console.log("cloud upload called for "+name);
+  uploadDataToFirebase(name, prg): Promise <any> {
+
+    return new Promise((resolve, reject) => {
+
+    console.log("cloud upload called for " + name);
     //this.presentLoader("loading...");
     let storageRef = firebase.storage().ref();
     console.log("storage ref is " + storageRef);
-    this.file.readAsArrayBuffer(this.file.dataDirectory, this.logFile)
+    return this.file.readAsArrayBuffer(this.file.dataDirectory, this.logFile)
       .then(succ => {
         console.log("File read");
         console.log(succ);
@@ -233,13 +255,13 @@ export class CommonUtilsProvider {
         uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
           (snapshot) => {
             let progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-           if (prg) prg.val = progress;
-
+            if (prg) prg.val = progress;
           },
           (error) => {
             console.log("Firebase put error " + JSON.stringify(error));
             setTimeout(() => { prg.val = -1; }, 500);
             this.presentToast("upload error", "error")
+            reject (error)
           },
           () => {
             prg.val = 100;
@@ -251,18 +273,22 @@ export class CommonUtilsProvider {
             //let key = 'tripDataIndex/'+name;
             //console.log ("key="+key);
             firebase.database().ref('tripDataIndex/').push()
-              .set({ 'url': downloadURL, 
-                     'uploadedon': Date(), 
-                      'uploadedby': this.user.email, 
-                      'name':name,
-                      'version': this.getVersion()
-                    })
-              .catch(err => { console.log("ERROR " + err); this.presentToast("error creating index", "error") })
+              .set({
+                'url': downloadURL,
+                'uploadedon': Date(),
+                'uploadedby': this.user.email,
+                'name': name,
+                'version': this.getVersion(),
+                'storageRef': `tripdata/${name}.txt`
+              })
+              .then (succ=>resolve(succ))
+              .catch(err => { console.log("ERROR " + err); this.presentToast("error creating index", "error"); reject (err) })
             this.presentToast("upload complete")
           }
         )
       })
-      .catch(err => { console.log("Cordova Read Error " + err); })
+      .catch(err => { console.log("Cordova Read Error " + err); reject (err) })
+    }) // new promise
   }
-
+  
 }
