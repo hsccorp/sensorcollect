@@ -199,16 +199,18 @@ export class HomePage {
     this.moveCount = 0;
     let alert = this.alert.create({
       title: 'Name your trip',
-      inputs: [{
+      inputs: [
+      {
         name: 'name',
         placeholder: 'Your trip name',
-      }],
+      },
+    ],
 
       buttons: [{
         text: 'Cancel',
-        role: 'cancel',
         handler: data => {
-          console.log('Cancel clicked');
+          console.log('Cancel clicked'+JSON.stringify(data));
+
         }
 
       },
@@ -419,7 +421,6 @@ export class HomePage {
           buttons: [
             {
               text: 'Cancel',
-              role: 'cancel',
               handler: () => {
                 console.log('Cancel clicked');
                 reject(false);
@@ -471,7 +472,6 @@ export class HomePage {
       buttons: [
         {
           text: 'Cancel',
-          role: 'cancel',
           handler: () => {
             console.log('Cancel clicked');
           }
