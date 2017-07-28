@@ -14,6 +14,7 @@ import { InAppBrowser } from '@ionic-native/in-app-browser';
 })
 export class ViewTripsPage {
   trips: any[] = [];
+  status = "loading tips...";
 
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public utils: CommonUtilsProvider, public zone: NgZone, public socialSharing: SocialSharing, public iab: InAppBrowser) {
@@ -110,6 +111,7 @@ export class ViewTripsPage {
       // the array update can occur outside Angular's refresh digest
       this.zone.run(() => {
         this.trips = ltrips;
+        if (!this.trips.length) {this.status = "No trips found"}
         this.utils.removerLoader();
 
       })

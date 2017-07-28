@@ -12,7 +12,7 @@
     </div>
   <ion-list nolines>
     <ion-item *ngIf="!trips.length">
-      No trips found
+     {{this.status}}
     </ion-item>
     <ion-item-sliding #slidingItem *ngFor="let trip of trips">
       <ion-item>
