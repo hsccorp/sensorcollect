@@ -38,7 +38,7 @@ export class CommonUtilsProvider {
   }
 
   getRemoteVersion(): Promise <any> {
-    let url = "https://raw.githubusercontent.com/hsccorp/sensorcollect/master/version.txt";
+    let url = "https://raw.githubusercontent.com/hsccorp/sensorcollect/master/version.txt?random="+Math.random();
     return new Promise((resolve, reject) => {
         this.http.get(url).map(res=>res).subscribe(data => {
             let ver = data["_body"];
