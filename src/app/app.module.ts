@@ -6,6 +6,7 @@ import { StatusBar } from '@ionic-native/status-bar';
 
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
+import {AlertModalPage} from '../pages/alert-modal/alert-modal';
 import { ViewTripsPage } from '../pages/view-trips/view-trips';
 
 import { DeviceMotion } from '@ionic-native/device-motion';
@@ -44,6 +45,7 @@ import { HttpModule } from '@angular/http';
     MyApp,
     HomePage,
     ViewTripsPage,
+    AlertModalPage,
     ProgressBarComponent
   ],
   imports: [
@@ -59,7 +61,8 @@ import { HttpModule } from '@angular/http';
   entryComponents: [
     MyApp,
     HomePage,
-    ViewTripsPage
+    ViewTripsPage,
+    AlertModalPage
   ],
   providers: [
     Geolocation,

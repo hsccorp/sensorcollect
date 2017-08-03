@@ -1,0 +1,34 @@
+
+<ion-content no-bounce >
+  <ion-list-header>Name Your Trip</ion-list-header>
+  <ion-item >
+    <ion-input [(ngModel)]="inputData.name"  placeholder="trip name"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Track GPS lat/long</ion-label>
+    <ion-checkbox [(ngModel)]="inputData.xy" ></ion-checkbox>
+    
+  </ion-item>
+
+  <!--<ion-item>
+    <ion-label>Read BLE OBD</ion-label>
+    <ion-checkbox [(ngModel)]="inputData.obd" ></ion-checkbox>
+  </ion-item>-->
+  
+  <ion-grid>
+    <ion-row>
+      <ion-col width-50>
+        <button ion-button block outline (click)="inputCancelled()">Cancel</button>
+      </ion-col>
+
+      <ion-col width-50>
+        <button ion-button block  strong outline (click)="inputSubmitted()">Okay</button>
+      </ion-col>
+      
+    </ion-row>
+  </ion-grid>
+
+  
+
+</ion-content>

@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController, ModalController } from 'ionic-angular';
 import { DeviceMotion, DeviceMotionAccelerationData } from '@ionic-native/device-motion';
 import { Gyroscope, GyroscopeOrientation } from '@ionic-native/gyroscope';
 import { Geolocation } from '@ionic-native/geolocation';
@@ -11,7 +11,7 @@ import { Insomnia } from '@ionic-native/insomnia';
 import { CommonUtilsProvider } from '../../providers/common-utils/common-utils';
 import { AlertController } from 'ionic-angular';
 import { ViewTripsPage } from "../view-trips/view-trips";
-
+import { AlertModalPage } from "../alert-modal/alert-modal";
 
 
 @Component({
@@ -79,9 +79,11 @@ export class HomePage {
   pendingUpload: boolean = false; // if true, cloud upload failed
   remoteVer:string = "0.0.0"; // latest remote app version;
   isOutdated: boolean; // true if new version av.
+  logCoords: boolean = true; // if true, will capture latLong
 
   // init
-  constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController) {
+  constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController, public modal:ModalController) {
+    //, 
 
     plt.ready().then(() => {
       this.utils.init();
@@ -175,7 +177,15 @@ export class HomePage {
         if (data.coords) {
           // this is meters per sec, convert to mph
           this.speed = data.coords.speed * 2.23694;
-          if (this.isLogging()) { this.storeLog('gps', data.coords); }
+          if (this.isLogging()) { 
+            if (!this.logCoords) {
+              data.coords.latitude = 0;
+              data.coords.longitude = 0;
+              data.coords.altitude = 0;
+
+            }
+            this.storeLog('gps', data.coords); 
+          }
         }
       });
   }
@@ -197,26 +207,12 @@ export class HomePage {
     this.pause = false;
     this.pauseColor = 'dark';
     this.moveCount = 0;
-    let alert = this.alert.create({
-      title: 'Name your trip',
-      inputs: [
-      {
-        name: 'name',
-        placeholder: 'Your trip name',
-      },
-    ],
-
-      buttons: [{
-        text: 'Cancel',
-        handler: data => {
-          console.log('Cancel clicked'+JSON.stringify(data));
-
-        }
-
-      },
-      {
-        text: 'Ok',
-        handler: data => {
+    
+     let im = this.modal.create(AlertModalPage, {}, {cssClass:"alertModal", enableBackdropDismiss:false});
+     im.onDidDismiss( data => {
+       console.log ("RETURNED: "+JSON.stringify(data));
+       if (data.isCancelled==false) {
+         this.logCoords = data.xy;
           this.clearArray(); // remove array
           this.utils.deleteLog() // remove log file
             .then(_ => {
@@ -234,12 +230,29 @@ export class HomePage {
             })
             .catch(err => { this.utils.presentToast('problem removing log file', 'error'); })
 
-        },
-      }],
-    });
-    alert.present();
+       }
+            
+      })
+     im.present();
 
-  }
+ }
+
+ // aborts a trip without saving 
+ abortTrip() {
+  console.log("Inside abort trip");
+  
+  this.utils.stopTimer(this.timer);
+  this.toggleButtonState();
+  this.stopAllSensors();
+  this.insomnia.allowSleepAgain()
+      .then((succ) => { console.log("*** WAKE LOCK RELEASED OK **") })
+      .catch((err) => { console.log("Error, releasing wake lock:" + err) });
+  this.utils.setPendingUpload(false, this.currentTripName);
+  this.pendingUpload = false;
+  this.utils.presentToast ("Trip Aborted", "success");
+
+
+ }
 
   // stops trip, and associated sensors
   stopTrip() {
@@ -268,7 +281,6 @@ export class HomePage {
           .catch(err => {
             console.log("bubble up: upload failed");
             this.utils.setPendingUpload(true, this.currentTripName);
-
             this.pendingUpload = true;
 
           })

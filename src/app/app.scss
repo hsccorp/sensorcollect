@@ -30,3 +30,103 @@
     font-size:1.2rem;
     color:grey;
 }
+
+
+
+// credit: https://forum.ionicframework.com/t/custom-modal-alert-with-html-form/47980/26
+.alertModal {
+  @media (min-height: 500px) {
+    ion-backdrop {
+      visibility: visible;
+    }
+  }
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: $z-index-overlay;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  contain: strict;
+  .modal-wrapper {
+    &,
+    .ion-page,
+    .ion-page .content,
+    .ion-page .content .scroll-content {
+      contain: content;
+      position: relative;
+      top: auto;
+      left: auto;
+      padding:1px;
+
+    }
+
+    z-index: $z-index-overlay-wrapper;
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
+    min-width: $alert-min-width;
+    max-height: $alert-max-height;
+    opacity: 0;
+    height: auto;
+    max-width: $alert-md-max-width;
+    border-radius: $alert-md-border-radius;
+    background-color: $alert-md-background-color;
+    box-shadow: $alert-md-box-shadow;
+    border-radius: 25px;
+    padding:5px;
+    
+
+    .ion-page .content {
+      background-color: color($colors, light);
+      
+    }
+
+    
+  }
+}
+
+//https://forum.ionicframework.com/t/custom-modal-alert-with-html-form/47980/37
+/*
+.alertModal {
+    ion-content {
+        &.content {
+            div.scroll-content {
+                top: 10%;
+                left: 10%;
+                width: 80%;
+                height: 50%;
+                overflow:hidden;
+            }
+        }
+
+        &.content-ios {
+            background-color: rgba(0, 0, 0, 0.3);
+
+            div.scroll-content {
+                background-color: #f8f8f8;
+                border-radius: 13px;
+                padding: 16px;
+            }
+        }
+
+        &.content-md {
+            background-color: rgba(0, 0, 0, 0.5);
+            
+            div.scroll-content {
+                background-color: #fafafa;
+                border-radius: 2px;
+                box-shadow: 0 16px 20px rgba(0, 0, 0, 0.4);
+                padding: 24px;
+            }
+        }
+    }
+}
+*/
+
