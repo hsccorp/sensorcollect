@@ -38,7 +38,7 @@ export class CommonUtilsProvider {
   }
 
   getRemoteVersion(): Promise <any> {
-    let url = "https://firebasestorage.googleapis.com/v0/b/tripdata-3eb84.appspot.com/o/version%2Fversion.txt?alt=media&token=8d486ea3-44d3-41ad-8765-c650b28b0644";
+    let url = "https://raw.githubusercontent.com/hsccorp/sensorcollect/master/version.txt";
     return new Promise((resolve, reject) => {
         this.http.get(url).map(res=>res).subscribe(data => {
             let ver = data["_body"];
