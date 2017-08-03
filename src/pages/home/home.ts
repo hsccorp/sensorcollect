@@ -12,6 +12,7 @@ import { CommonUtilsProvider } from '../../providers/common-utils/common-utils';
 import { AlertController } from 'ionic-angular';
 import { ViewTripsPage } from "../view-trips/view-trips";
 import { AlertModalPage } from "../alert-modal/alert-modal";
+import {BlePage} from "../ble/ble";
 
 
 @Component({
@@ -105,7 +106,12 @@ export class HomePage {
   // loads view trip controller
   viewTrips() {
     console.log("View Trips");
-    this.navCtrl.push(ViewTripsPage, { animate: 'true', direction: 'back' });
+    this.navCtrl.push(ViewTripsPage);
+  }
+
+  ble() {
+    console.log("View BLE");
+    this.navCtrl.push(BlePage);
   }
 
   uploadPending(name) {

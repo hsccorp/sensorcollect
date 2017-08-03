@@ -26,7 +26,8 @@ import { IonicStorageModule } from '@ionic/storage';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { AppVersion } from '@ionic-native/app-version';
 import { HttpModule } from '@angular/http';
-
+import { BLE } from '@ionic-native/ble';
+import {BlePage} from "../pages/ble/ble";
 
 
 // Initialize Firebase
@@ -46,7 +47,8 @@ import { HttpModule } from '@angular/http';
     HomePage,
     ViewTripsPage,
     AlertModalPage,
-    ProgressBarComponent
+    ProgressBarComponent,
+    BlePage
   ],
   imports: [
     AngularFireModule.initializeApp(firebaseConfig),
@@ -62,7 +64,8 @@ import { HttpModule } from '@angular/http';
     MyApp,
     HomePage,
     ViewTripsPage,
-    AlertModalPage
+    AlertModalPage,
+    BlePage
   ],
   providers: [
     Geolocation,
@@ -77,6 +80,7 @@ import { HttpModule } from '@angular/http';
     File,
     InAppBrowser,
     AppVersion,
+    BLE,
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })
