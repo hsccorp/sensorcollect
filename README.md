@@ -11,7 +11,7 @@ Download
 Usage
 -----
 * "Start Trip" to start logging a trip. During this time, a wakelock will be taken, so good to keep the phone powered
-* While a trip is started, tap markers to mark an action for training. Yellow markers are for bad driving, grey for good driving (negative/positive training)
+* While a trip is started, tap markers to mark an action for training. Yellow markers are for bad driving, grey for good driving (negative/positive training). You can also tap the "mic" button on the lower right to speak out the marker names (0.0.4+) [requires voice services to be enabled]
 * To stop, press "Stop Trip". When you stop, the trip is automatically uploaded to firebase
 * If upload fails (maybe you are not online), a new "upload" button will show up for deferred upload
 * Tap on the "list" icon on top right of navbar to view uploaded trips, slide to share/delete
@@ -19,7 +19,7 @@ Usage
 
 Screenshots
 ------------
-<img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/sample1.PNG" height="600px" /><img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/sample2.PNG" height="600px" /><img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/sample1.PNG" height="600px" /><img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/sample4.PNG" height="600px" /><img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/sample3.PNG" height="600px" />
+<img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/sample1.PNG" height="600px" /><img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/sample2.PNG" height="600px" /><img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/sample3.PNG" height="600px" /><img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/sample4.PNG" height="600px" /><img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/sample5.PNG" height="600px" />
 
 Compilation
 -----------
