@@ -5,7 +5,7 @@ In addition to collecting data, I'm also logging a simple heuristic of tracking 
 
 Download
 ---------
-* Download an Android APK from [here](https://drive.google.com/open?id=0Bx0iW5j5f3AQdzJSNDlRV09UTEE)
+* Download an Android APK from [here](https://github.com/hsccorp/sensorcollect/releases/)
 * For iOS at the moment, please build from source
 
 Usage
