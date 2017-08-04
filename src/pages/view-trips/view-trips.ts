@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
-import { CommonUtilsProvider } from '../../providers/common-utils/common-utils';
-import * as firebase from 'firebase/app';
-import 'firebase/storage';
+import { CommonUtilsProvider } from 
+'../../providers/common-utils/common-utils';
+import { DatabaseProvider } from '../../providers/database/database';
+
 import { NgZone } from '@angular/core';
 import { SocialSharing } from '@ionic-native/social-sharing';
 import { ItemSliding } from 'ionic-angular';
@@ -13,11 +14,11 @@ import { InAppBrowser } from '@ionic-native/in-app-browser';
   templateUrl: 'view-trips.html',
 })
 export class ViewTripsPage {
-  trips: any[] = [];
-  status = "loading tips...";
+  trips: {data:any[]}  = {data:[]};
+  status = {text:"loading trips..."};
 
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public utils: CommonUtilsProvider, public zone: NgZone, public socialSharing: SocialSharing, public iab: InAppBrowser) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public utils: CommonUtilsProvider, public zone: NgZone, public socialSharing: SocialSharing, public iab: InAppBrowser, public db:DatabaseProvider) {
   }
 
   // displays the trip log in a new window
@@ -41,25 +42,12 @@ export class ViewTripsPage {
     // make sure you are logged in as the same user
     // as the trip you want to delete. ideally, this should
     // be at the firebase auth layer. Maybe someday.
-    if (trip.uploadedby != this.utils.getCachedUser().email) {
+    if (trip.uploadedby != this.db.getCachedUser().email) {
       this.utils.presentToast("Trip not uploaded by you", "error", 3000);
       return;
     }
-    // remove the DB index
-    let ref = firebase.database().ref('tripDataIndex/');
-    ref.child(trip.id).remove()
-      .then(succ => this.utils.presentToast("trip deleted"))
-      .catch(err => {
-        this.utils.presentToast("error deleting trip", "error");
-        console.log("Error:" + JSON.stringify(err));
-      })
-
-
-    // also delete the actual log file associated to the DB
-    let sref = firebase.storage().ref().child(trip.storageRef);
-    sref.delete()
-      .then(succ => { console.log("Storage deleted too"); })
-      .catch(err => { console.log("Error deleting storage:" + JSON.stringify(err)) })
+    this.db.removeTrip(trip);
+    
 
   }
 
@@ -87,42 +75,17 @@ export class ViewTripsPage {
 
   // TBD: Handle offline error
   cloudGetTrips() {
-    this.utils.presentLoader("retrieving trips...", 60000);
-    let ref = firebase.database().ref('tripDataIndex/');
-    let ltrips: any[] = [];
+    
+    this.db.listTripsDynamic (this.trips,this.status);
 
-    // any time data changes, this event will be called
-    // so deletions are automatically taken care of
-    ref.limitToLast(300).on('value', (snapshot) => {
-      let result = snapshot.val();
-      //console.log (JSON.stringify(result));
-      for (let k in result) {
-        ltrips.unshift({
-          id: k,
-          url: result[k].url,
-          date: result[k].uploadedon,
-          uploadedby: result[k].uploadedby,
-          name: result[k].name,
-          version: result[k].version,
-          storageRef: result[k].storageRef
-        });
+    
 
-      }
-      // the array update can occur outside Angular's refresh digest
-      this.zone.run(() => {
-        this.trips = ltrips;
-        if (!this.trips.length) {this.status = "No trips found"}
-        this.utils.removeLoader();
-
-      })
-
-    },
-    (error)=>{this.utils.removeLoader();this.utils.presentToast("Error accessing data","error")});
+ 
   }
 
   // authenticates and then downloads
   cloudGetTripsWithAuth() {
-    this.utils.doAuthWithPrompt()
+    this.db.doAuthWithPrompt()
       .then(succ => { this.cloudGetTrips() })
       .catch(err => { });
   }

@@ -29,6 +29,7 @@ import { HttpModule } from '@angular/http';
 import { BLE } from '@ionic-native/ble';
 import {BlePage} from "../pages/ble/ble";
 import { SpeechRecognition } from '@ionic-native/speech-recognition';
+import { DatabaseProvider } from '../providers/database/database';
 
 
 
@@ -84,7 +85,8 @@ import { SpeechRecognition } from '@ionic-native/speech-recognition';
     AppVersion,
     BLE,
     SpeechRecognition,
-    {provide: ErrorHandler, useClass: IonicErrorHandler}
+    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    DatabaseProvider
   ]
 })
 export class AppModule {}

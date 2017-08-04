@@ -3,13 +3,6 @@ import { NavController, NavParams } from 'ionic-angular';
 import { BLE } from '@ionic-native/ble';
 import { NgZone } from '@angular/core';
 
-/**
- * Generated class for the BlePage page.
- *
- * See http://ionicframework.com/docs/components/#navigation for more info
- * on Ionic pages and navigation.
- */
-
 @Component({
   selector: 'page-ble',
   templateUrl: 'ble.html',
@@ -44,10 +37,7 @@ export class BlePage {
       }
          
     });
-
     setTimeout ( () => { console.log ("Timer");this.stopScan()},20000)
-
-  
  }
 
  stopScan(){

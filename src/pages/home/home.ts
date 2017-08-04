@@ -8,6 +8,8 @@ import { Chart } from 'chart.js';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { Insomnia } from '@ionic-native/insomnia';
 import { CommonUtilsProvider } from '../../providers/common-utils/common-utils';
+import { DatabaseProvider } from '../../providers/database/database';
+
 import { AlertController } from 'ionic-angular';
 import { ViewTripsPage } from "../view-trips/view-trips";
 import { AlertModalPage } from "../alert-modal/alert-modal";
@@ -97,12 +99,12 @@ export class HomePage {
   iosOptions: SpeechRecognitionListeningOptionsIOS;
 
   // init
-  constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController, public modal:ModalController, public speech:  SpeechRecognition) {
+  constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController, public modal:ModalController, public speech:  SpeechRecognition, public db:DatabaseProvider) {
     //, 
 
     plt.ready().then(() => {
-      this.utils.init();
-      this.utils.getPendingUpload()
+      this.db.init();
+      this.db.getPendingUpload()
         .then(succ => { this.pendingUpload = succ.status; this.currentTripName = succ.name; console.log ("PENDING RETURNED "+JSON.stringify(succ)); })
       this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Accelerometer');
       this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
@@ -213,15 +215,16 @@ async hasPermission(): Promise<boolean> {
 
   uploadPending(name) {
 
+    console.log ("Trying to upload "+name);
     this.upload(this.currentTripName)
           .then(succ => {
             console.log("all good with upload");
-            this.utils.setPendingUpload(false);
+            this.db.setPendingUpload(false);
             this.pendingUpload = false;
           })
           .catch(err => {
-            console.log("bubble up: upload failed");
-            this.utils.setPendingUpload(true, this.currentTripName);
+            console.log("home bubble up: pending upload failed");
+            this.db.setPendingUpload(true, this.currentTripName);
 
             this.pendingUpload = true;
 
@@ -232,9 +235,9 @@ async hasPermission(): Promise<boolean> {
   // uploads file to firebase
   upload(name): Promise<any> {
     console.log("upload");
-    return this.utils.doAuthWithPrompt()
+    return this.db.doAuthWithPrompt()
       .then(succ => {
-        return this.utils.uploadDataToFirebase(name, this.progress);
+        return this.db.uploadDataToFirebase(name, this.progress);
       })
   }
 
@@ -317,7 +320,7 @@ async hasPermission(): Promise<boolean> {
        if (data.isCancelled==false) {
          this.logCoords = data.xy;
           this.clearArray(); // remove array
-          this.utils.deleteLog() // remove log file
+          this.db.deleteLog() // remove log file
             .then(_ => {
               // start new log and start trip
               this.currentTripName = data.name || 'unnamed trip';
@@ -350,7 +353,7 @@ async hasPermission(): Promise<boolean> {
   this.insomnia.allowSleepAgain()
       .then((succ) => { console.log("*** WAKE LOCK RELEASED OK **") })
       .catch((err) => { console.log("Error, releasing wake lock:" + err) });
-  this.utils.setPendingUpload(false, this.currentTripName);
+  this.db.setPendingUpload(false, this.currentTripName);
   this.pendingUpload = false;
   this.utils.presentToast ("Trip Aborted", "success");
 
@@ -371,19 +374,20 @@ async hasPermission(): Promise<boolean> {
       this.flushLog().then(_ => {
         let str = "]}\n";
         console.log("STOPPING TRIP, writing " + str);
-        this.utils.writeString(str);
+        this.db.writeString(str);
         this.clearArray();
         this.toggleButtonState();
         this.utils.presentToast("trip recording stopped");
         this.upload(this.currentTripName)
           .then(succ => {
             console.log("all good with upload");
-            this.utils.setPendingUpload(false);
+            this.db.setPendingUpload(false);
             this.pendingUpload = false;
           })
           .catch(err => {
-            console.log("bubble up: upload failed");
-            this.utils.setPendingUpload(true, this.currentTripName);
+            console.log("home bubble up: upload failed in stop trip");
+            console.log (JSON.stringify(err));
+            this.db.setPendingUpload(true, this.currentTripName);
             this.pendingUpload = true;
 
           })
@@ -402,7 +406,7 @@ async hasPermission(): Promise<boolean> {
     let str = "{\n    \"id\":\"" + tname + "\",\n";
     str += "    \"sensors\":[\n";
     console.log("STARTING TRIP, writing " + str);
-    this.utils.writeString(str)
+    this.db.writeString(str)
       .then(resp => { })
       .catch(e => { "ERROR:" + e });
 
@@ -480,19 +484,17 @@ async hasPermission(): Promise<boolean> {
   // allow marker even if paused. if paused, start.
   setMarker(str) {
     this.storeLog('Marker', str);
-    this.utils.presentToast(str + ' market set', 'success', 1500);
+    this.utils.presentToast(str + ' marker set', 'success', 1500);
     // restart recording if paused
     if (!this.isLogging()) this.togglePause();
   }
 
   // uses speech recognition - may not be accurate words, so lets differentiate
   setSpeechMarker(str) {
-
-   
     str = this.speechSanitize (str);
-     console.log ("SPEECH MARKER " + str);
+    console.log ("SPEECH MARKER " + str);
     this.storeLog('SpeechMarker', str);
-    this.utils.presentToast(str + ' market set', 'success', 1500);
+    this.utils.presentToast(str + ' marker set', 'success', 1500);
     // restart recording if paused
     if (!this.isLogging()) this.togglePause();
   }
@@ -526,7 +528,7 @@ async hasPermission(): Promise<boolean> {
 
   // shares latest trip
   share() {
-    let f = this.utils.logFileLocation();
+    let f = this.db.logFileLocation();
     let options = {
       subject: 'TripData trip logs',
       message: 'Trip logs attached',
@@ -552,7 +554,7 @@ async hasPermission(): Promise<boolean> {
 
   flushLog() {
     console.log(">>>>>>>Flushing logs...");
-    return this.utils.writeLog(this.logs);
+    return this.db.writeLog(this.logs);
   }
 
 
@@ -634,7 +636,7 @@ async hasPermission(): Promise<boolean> {
           handler: () => {
             this.utils.presentToast("clearing log file");
             this.clearArray();
-            this.utils.deleteLog();
+            this.db.deleteLog();
 
           }
         }
