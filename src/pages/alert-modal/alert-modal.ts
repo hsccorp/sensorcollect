@@ -14,6 +14,7 @@ export class AlertModalPage {
     console.log ("*** Modal constructor");
   }
 
+  // don't act on modal input
   inputCancelled() {
     console.log ("Cancelled");
     this.inputData.isCancelled = true;
