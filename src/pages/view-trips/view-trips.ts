@@ -26,8 +26,8 @@ export class ViewTripsPage {
     this.utils.presentLoader("loading trip...");
     const browser = this.iab.create(trip.url, "_blank", "enableViewPortScale=yes,closebuttoncaption=Done");
 
-    browser.on('loadstop').subscribe(resp => { console.log("STOP"); this.utils.removerLoader() });
-    browser.on('loaderror').subscribe(resp => { console.log("ERROR"); this.utils.removerLoader() });
+    browser.on('loadstop').subscribe(resp => { console.log("STOP"); this.utils.removeLoader() });
+    browser.on('loaderror').subscribe(resp => { console.log("ERROR"); this.utils.removeLoader() });
 
 
   }
@@ -112,12 +112,12 @@ export class ViewTripsPage {
       this.zone.run(() => {
         this.trips = ltrips;
         if (!this.trips.length) {this.status = "No trips found"}
-        this.utils.removerLoader();
+        this.utils.removeLoader();
 
       })
 
     },
-    (error)=>{this.utils.removerLoader();this.utils.presentToast("Error accessing data","error")});
+    (error)=>{this.utils.removeLoader();this.utils.presentToast("Error accessing data","error")});
   }
 
   // authenticates and then downloads

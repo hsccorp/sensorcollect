@@ -28,6 +28,8 @@ import { AppVersion } from '@ionic-native/app-version';
 import { HttpModule } from '@angular/http';
 import { BLE } from '@ionic-native/ble';
 import {BlePage} from "../pages/ble/ble";
+import { SpeechRecognition } from '@ionic-native/speech-recognition';
+
 
 
 // Initialize Firebase
@@ -81,6 +83,7 @@ import {BlePage} from "../pages/ble/ble";
     InAppBrowser,
     AppVersion,
     BLE,
+    SpeechRecognition,
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })

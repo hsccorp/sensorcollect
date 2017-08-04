@@ -1,9 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
-import { NavController, ModalController } from 'ionic-angular';
+import { NavController, ModalController, Platform } from 'ionic-angular';
 import { DeviceMotion, DeviceMotionAccelerationData } from '@ionic-native/device-motion';
 import { Gyroscope, GyroscopeOrientation } from '@ionic-native/gyroscope';
 import { Geolocation } from '@ionic-native/geolocation';
-import { Platform } from 'ionic-angular';
 import { SocialSharing } from '@ionic-native/social-sharing';
 import { Chart } from 'chart.js';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
@@ -13,6 +12,10 @@ import { AlertController } from 'ionic-angular';
 import { ViewTripsPage } from "../view-trips/view-trips";
 import { AlertModalPage } from "../alert-modal/alert-modal";
 import {BlePage} from "../ble/ble";
+import { SpeechRecognition,SpeechRecognitionListeningOptionsAndroid, SpeechRecognitionListeningOptionsIOS } from '@ionic-native/speech-recognition';
+
+import * as Fuse from 'fuse.js';
+
 
 
 @Component({
@@ -31,18 +34,24 @@ export class HomePage {
   // val = what is written in the log
   markers = [
     //  good markers
-    { name: 'left', val: 'left', color: 'light' },
-    { name: 'right', val: 'right', color: 'light' },
-    { name: 'brake', val: 'brake', color: 'light' },
-    { name: 'unknown', val: 'unknown', color: 'light' },
+    { name: 'turn', val: 'turn', color: 'light' , speech: 'turn'},
+    { name: 'brake', val: 'brake', color: 'light', speech: 'brake' },
+    { name: 'unknown', val: 'unknown', color: 'light', speech: 'unknown' },
     // bad markers
-    { name: 'brake', val: 'hard-brake', color: 'alert' },
-    { name: 'distract', val: 'distract', color: 'alert' },
-    { name: 'speedup', val: 'speedup', color: 'alert' },
-    { name: 'left', val: 'hard-left', color: 'alert' },
-    { name: 'right', val: 'hard-right', color: 'alert' },
-
+    { name: 'brake', val: 'hard-brake', color: 'alert', speech: 'hard brake' },
+    { name: 'distract', val: 'distract', color: 'alert', speech: 'distract' },
+    { name: 'speedup', val: 'speedup', color: 'alert', speech: 'speed up' },
+    { name: 'turn', val: 'sharp-turn', color: 'alert' , speech: 'sharp turn'},
   ]
+
+   myFuseOptions: Fuse.FuseOptions = {
+    caseSensitive: false,
+    keys: ['speech'],
+    shouldSort: true,
+};
+ myFuse = new Fuse(this.markers, this.myFuseOptions);
+
+
 
   // handles to DOM for graphs
   @ViewChild('acc') accCanvas;
@@ -81,9 +90,14 @@ export class HomePage {
   remoteVer:string = "0.0.0"; // latest remote app version;
   isOutdated: boolean; // true if new version av.
   logCoords: boolean = true; // if true, will capture latLong
+  speechAvailable:boolean = true; // if false, speech recog will be disabled
+  latestSpeech:string = ""; // will hold latest words
+
+  androidOptions: SpeechRecognitionListeningOptionsAndroid;
+  iosOptions: SpeechRecognitionListeningOptionsIOS;
 
   // init
-  constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController, public modal:ModalController) {
+  constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController, public modal:ModalController, public speech:  SpeechRecognition) {
     //, 
 
     plt.ready().then(() => {
@@ -93,10 +107,93 @@ export class HomePage {
       this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Accelerometer');
       this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
 
+      this.speech.isRecognitionAvailable()
+      .then((available: boolean) => {console.log("Speech recognition:" + available);
+          if (!available) {
+            this.utils.presentToast ("Speech recognition not supported", "error");
+            this.speechAvailable = false;
+          }
+          else {
+            this.getPermission()
+            .then (succ=>{console.log ("Got speech permission");})
+            .catch (err=>{
+              console.log ("Error getting speech permission"); 
+              this.speechAvailable = false;
+              this.utils.presentToast ("Error getting speech permissions", "error");
+            })
 
+          }
+    })
     });
 
   }
+
+
+  // credit: https://learnionic2.com/2017/03/30/speech-to-text-with-ionic-2/
+
+  async getPermission(): Promise<void> {
+  try {
+    let permission = await this.speech.requestPermission();
+    console.log(permission);
+    return permission;
+  }
+
+  
+  catch (e) {
+    console.error(e);
+  }
+}
+
+async hasPermission(): Promise<boolean> {
+  try {
+    let permission = await this.speech.hasPermission();
+    console.log(permission);
+    return permission;
+  }
+  catch (e) {
+    console.error(e);
+  }
+}
+
+  recognizeSpeech() {
+    console.log ("SPEECH");
+
+  this.androidOptions = {
+    prompt: 'Please start speaking'
+  }
+ 
+  this.iosOptions = {
+    language: 'en-US'
+  }
+ 
+  if (this.plt.is('android')) {
+    this.speech.requestPermission().then (
+      succ=> {
+        this.speech.startListening(this.androidOptions).subscribe(data => {console.log (data); this.latestSpeech = data[0];this.setSpeechMarker(this.latestSpeech)}, 
+        error => console.log(error));
+      }
+    )
+    
+  }
+  else if (this.plt.is('ios')) {
+    this.speech.requestPermission().then (
+      succ=> {
+        this.utils.presentLoader ("Please speak...");
+        setTimeout ( ()=>{
+          this.speech.stopListening();
+          this.utils.removeLoader();
+
+        },3000)
+        this.speech.startListening(this.iosOptions)
+        .subscribe(data => {console.log (data);this.speech.stopListening(); this.latestSpeech = data[0]; this.setSpeechMarker(this.latestSpeech)}, 
+                  error => console.log(error));
+      }
+    )
+    
+  }
+
+  }
+
 
   // returns app version
   getVersion() {
@@ -388,6 +485,44 @@ export class HomePage {
     if (!this.isLogging()) this.togglePause();
   }
 
+  // uses speech recognition - may not be accurate words, so lets differentiate
+  setSpeechMarker(str) {
+
+   
+    str = this.speechSanitize (str);
+     console.log ("SPEECH MARKER " + str);
+    this.storeLog('SpeechMarker', str);
+    this.utils.presentToast(str + ' market set', 'success', 1500);
+    // restart recording if paused
+    if (!this.isLogging()) this.togglePause();
+  }
+
+  // corrects some common speech snafus
+  // will heavily depend on accent
+  speechSanitize (str) {
+    let s = str.toLowerCase();
+    let fuzzy = this.myFuse.search(s);
+
+    if (!fuzzy.length) {
+      console.log ("Fuzzy search failed, going with manual sanitization");
+      s = s.replace ("heartbreak", "hard brake");
+      s = s.replace (/break/g, "brake");
+      s = s.replace (/heart/g, "hard");
+      s = s.replace (/speed up/g, "speedup");
+      s = s.replace (/ /g, "-");
+    }
+    else {
+      s = fuzzy[0]["val"];
+      console.log ("Fuzzy returned: "+s);
+    }
+    
+
+    console.log ("FUZE");
+    console.log (this.myFuse.search(str));
+    return s;
+
+  }
+
 
   // shares latest trip
   share() {
@@ -521,7 +656,7 @@ export class HomePage {
       this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Accelerometer');
       this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
       ;
-      this.utils.removerLoader();
+      this.utils.removeLoader();
     }, 500);
   }
 

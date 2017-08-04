@@ -66,7 +66,7 @@ export class CommonUtilsProvider {
     this.loader.present();
   }
 
-  removerLoader() {
+  removeLoader() {
     if (this.loader) { this.loader.dismiss(); }
   }
 

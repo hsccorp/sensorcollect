@@ -81,4 +81,10 @@
       <canvas #gyro></canvas>
     </div>
   </div>
+
+  <ion-fab bottom right  *ngIf="speechAvailable && logState=='Stop'">
+     <button ion-fab color="danger" (click) = "recognizeSpeech()" ><ion-icon name="mic"></ion-icon></button>
+  </ion-fab>
+
+   
 </ion-content>
