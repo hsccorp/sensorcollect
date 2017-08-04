@@ -591,9 +591,7 @@ export class HomePage {
   }
 
   ionViewDidLoad() {
-    // never printed ? needs to be inside plt.ready I bet...
-    console.log("*********** LOADED VIEW ");
-    this.plt.ready().then(() => {
+      this.plt.ready().then(() => {
       this.utils.getRemoteVersion()
       .then (ver => {
         this.remoteVer = ver;

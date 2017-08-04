@@ -1,13 +1,8 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams, ViewController } from 'ionic-angular';
 
-
-/**
- * Generated class for the AlertModalPage page.
- *
- * See http://ionicframework.com/docs/components/#navigation for more info
- * on Ionic pages and navigation.
- */
+// Styled modal that can replace an alert controller
+// had to do this because alerts do not support a mix of input types
 
 @Component({
   selector: 'page-alert-modal',
