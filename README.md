@@ -13,6 +13,8 @@ Usage
 * "Start Trip" to start logging a trip. During this time, a wakelock will be taken, so good to keep the phone powered
 * While a trip is started, tap markers to mark an action for training. Yellow markers are for bad driving, grey for good driving (negative/positive training). You can also tap the "mic" button on the lower right to speak out the marker names (0.0.4+) [requires voice services to be enabled]
 * To stop, press "Stop Trip". When you stop, the trip is automatically uploaded to firebase
+* To abort a trip, tap the "X" button - this will clear the current trip without uploading to firebase
+* If you want to blank out certain parts of the trip, tap pause to toggle pause on/off as you need. Note that creating a marker automatically un-pauses a paused trip
 * If upload fails (maybe you are not online), a new "upload" button will show up for deferred upload
 * Tap on the "list" icon on top right of navbar to view uploaded trips, slide to share/delete
 * "Share" lets you share the latest trip file with others 
