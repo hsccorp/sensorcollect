@@ -1,0 +1,2 @@
+include-labels = breaking,bug,enhancement
+exclude-labels = not supported/no plans
