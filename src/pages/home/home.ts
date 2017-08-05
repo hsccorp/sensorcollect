@@ -190,6 +190,11 @@ export class HomePage {
 
   }
 
+  clearLogin() {
+    this.db.clearUser();
+    this.utils.presentToast ("cleared user");
+
+  }
 
   // returns app version
   getVersion() {

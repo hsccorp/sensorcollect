@@ -148,6 +148,8 @@ export class DatabaseProvider {
   // called if credentials are wrong, so user is prompted again
   clearUser() {
     console.log("clearing user");
+    this.user.email ="";
+    this.user.password = "";
     this.storage.remove('user')
       .catch(e => { console.log("user clear error:" + JSON.stringify(e)) });
   }

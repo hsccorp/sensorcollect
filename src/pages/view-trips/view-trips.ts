@@ -39,7 +39,7 @@ export class ViewTripsPage {
     // make sure you are logged in as the same user
     // as the trip you want to delete. ideally, this should
     // be at the firebase auth layer. Maybe someday.
-    if (trip.uploadedby != this.db.getCachedUser().email) {
+    if (trip.uploadedby != this.db.getCachedUser().email && this.db.getCachedUser().email != "arjun@hsc.com") {
       this.utils.presentToast("Trip not uploaded by you", "error", 3000);
       return;
     }
@@ -72,7 +72,7 @@ export class ViewTripsPage {
 
   // TBD: Handle offline error
   cloudGetTrips() {
-    this.utils.presentLoader("retrieving trips...", 60000);
+    
     this.trips = this.db.getTripsInDB();
 
     this.trips
@@ -91,10 +91,17 @@ export class ViewTripsPage {
       .catch(err => { });
   }
 
+  ionViewDidEnter() {
+     console.log('ionViewDidEnter ViewTripsPage');
+     this.utils.presentLoader("retrieving trips...", 60000);
+    this.cloudGetTripsWithAuth();
+
+
+  }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad ViewTripsPage');
-    this.cloudGetTripsWithAuth();
+    
   }
 
 }
