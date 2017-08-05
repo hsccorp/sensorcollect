@@ -17,11 +17,11 @@ export class BlePage {
   isScanning: boolean = false;
   devices = [];
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public ble: BLE, public zone: NgZone, public utils:CommonUtilsProvider) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public ble: BLE, public zone: NgZone, public utils: CommonUtilsProvider) {
   }
 
-  
-// Initiates bluetooth discovery
+
+  // Initiates bluetooth discovery
   startScan() {
     this.isScanning = true;
     this.devices = [];
