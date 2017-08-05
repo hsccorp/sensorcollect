@@ -10,7 +10,7 @@ import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 
 
-const versionUrl: string = "https://raw.githubusercontent.com/hsccorp/sensorcollect/master/version.txt";
+const versionUrl:string = "https://api.github.com/repos/hsccorp/sensorcollect/releases/latest";
 
 // TBD: firebase stuff is here too - need to move it out to its own service
 
@@ -20,8 +20,6 @@ export class CommonUtilsProvider {
   loader: any;
   timer: any;
   version: string = "undefined";
-
-
 
   constructor(public toastCtrl: ToastController, public loadingCtrl: LoadingController, public alert: AlertController, public appVersion: AppVersion, public plt: Platform, public http: Http) {
 
@@ -33,11 +31,12 @@ export class CommonUtilsProvider {
   }
 
   getRemoteVersion(): Promise<any> {
-    let url = versionUrl + "?random=" + Math.random();
+    let url = versionUrl;
     return new Promise((resolve, reject) => {
-      this.http.get(url).map(res => res).subscribe(data => {
-        let ver = data["_body"];
-        console.log("Latest app version:" + ver);
+      this.http.get(url).map(res => res.json()).subscribe(data => {
+        let ver = data.tag_name;
+        ver = ver.replace ("v","");
+        console.log("Latest app version:" + JSON.stringify(ver));
         resolve(ver);
       },
         err => { console.log("Latest App version error:" + JSON.stringify(err)); reject(err); }
