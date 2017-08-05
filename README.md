@@ -1,4 +1,8 @@
-an app to collect sensor data in a mobile app. Meant to be used while in a car. Currently logging accelerometer, gyroscope and GPS data.
+[**CHANGELOG**](https://github.com/hsccorp/sensorcollect/blob/master/CHANGELOG.md)
+
+What
+------
+An app to collect sensor data in a mobile app. Meant to be used while in a car. Currently logging accelerometer, gyroscope and GPS data.
 
 In addition to collecting data, I'm also logging a simple heuristic of tracking the accelerometer's Z-axis. Assuming you move the phone forward when peeking, z-axis seems to be the best indication so far.
 
