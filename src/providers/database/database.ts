@@ -3,12 +3,10 @@ import { ToastController, LoadingController, AlertController } from 'ionic-angul
 import { CommonUtilsProvider } from '../common-utils/common-utils';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
-
 import * as firebase from 'firebase/app';
 import 'firebase/storage';
 import { Storage } from '@ionic/storage';
 import { File } from '@ionic-native/file';
-
 import 'rxjs/add/operator/map';
 import { Http } from '@angular/http';
 import { NgZone } from '@angular/core';
@@ -45,6 +43,8 @@ export class DatabaseProvider {
 
   }
 
+  /****  LOCAL DB RELATED ******/
+
   // write a text string to the logs - used for headers at the start and end 
   // of a trip
   writeString(str) {
@@ -63,37 +63,6 @@ export class DatabaseProvider {
 
   }
 
-  // deletes a trip from firebase DB and firebase storage
-  removeTripStorage(store) {
-    console.log("Storage: " + store);
-    // also delete the actual log file associated to the DB
-    let sref = firebase.storage().ref().child(store);
-    sref.delete()
-      .then(succ => { console.log("Storage deleted too"); })
-      .catch(err => { console.log("Error deleting storage:" + JSON.stringify(err)) })
-  }
-
-
-  // called in view trips - attaches to DB list in firebase and updates
-  // view. TBD - move view code to view trips
-  getTripsInDB() {
-    let ltrips: any[] = [];
-    // any time data changes, this event will be called
-    // so deletions are automatically taken care of
-
-    return this.afDb.list('tripDataIndex/',
-      {
-        query: {
-          limitToLast: 300
-        }
-      }).map(array => array.reverse()) as FirebaseListObservable<any[]>;;
-
-
-  }
-
-  getDBIndex() {
-    return firebase.database().ref('tripDataIndex/');
-  }
 
   logFileLocation() {
     return this.file.dataDirectory + this.logFile;
@@ -103,6 +72,35 @@ export class DatabaseProvider {
     return this.file.writeFile(this.file.dataDirectory, "triplog.txt", "", { replace: true });
   }
 
+
+  // called if credentials are wrong, so user is prompted again
+  clearUser() {
+    console.log("clearing user");
+    this.user.email = "";
+    this.user.password = "";
+    this.storage.remove('user')
+      .catch(e => { console.log("user clear error:" + JSON.stringify(e)) });
+  }
+
+  getUser(): Promise<any> {
+    return this.storage.get('user');
+  }
+
+  setPendingUpload(status, name = ""): Promise<any> {
+    console.log("Pending called with " + status + " " + name);
+    return this.storage.set('pendingUpload', { status: status, name: name })
+  }
+
+  getPendingUpload(): Promise<any> {
+    return this.storage.get('pendingUpload')
+  }
+
+  getCachedUser() {
+    return this.user;
+  }
+
+
+  /****  FIREBASE DB RELATED ******/
 
   // if the app user has not provided credentials for firebase DB, this will ask
   // for it. 
@@ -144,33 +142,6 @@ export class DatabaseProvider {
       alert.present();
     });
   }
-
-  // called if credentials are wrong, so user is prompted again
-  clearUser() {
-    console.log("clearing user");
-    this.user.email ="";
-    this.user.password = "";
-    this.storage.remove('user')
-      .catch(e => { console.log("user clear error:" + JSON.stringify(e)) });
-  }
-
-  getUser(): Promise<any> {
-    return this.storage.get('user');
-  }
-
-  setPendingUpload(status, name = ""): Promise<any> {
-    console.log("Pending called with " + status + " " + name);
-    return this.storage.set('pendingUpload', { status: status, name: name })
-  }
-
-  getPendingUpload(): Promise<any> {
-    return this.storage.get('pendingUpload')
-  }
-
-  getCachedUser() {
-    return this.user;
-  }
-
   doAuthWithPrompt(): Promise<any> {
     return this.getUser()
       .then(user => {
@@ -214,6 +185,39 @@ export class DatabaseProvider {
 
   }
 
+  // deletes a trip from firebase DB and firebase storage
+  removeTripStorage(store) {
+    console.log("Storage: " + store);
+    // also delete the actual log file associated to the DB
+    let sref = firebase.storage().ref().child(store);
+    sref.delete()
+      .then(succ => { console.log("Storage deleted too"); })
+      .catch(err => { console.log("Error deleting storage:" + JSON.stringify(err)) })
+  }
+
+
+  // called in view trips - attaches to DB list in firebase and updates
+  // view. TBD - move view code to view trips
+  getTripsInDB() {
+    let ltrips: any[] = [];
+    // any time data changes, this event will be called
+    // so deletions are automatically taken care of
+
+    return this.afDb.list('tripDataIndex/',
+      {
+        query: {
+          limitToLast: 300
+        }
+      }).map(array => array.reverse()) as FirebaseListObservable<any[]>;;
+
+
+  }
+
+  getDBIndex() {
+    return firebase.database().ref('tripDataIndex/');
+  }
+
+
   // upload trip data to firebase. called by doAuth
   // after all auth validation is done
   uploadDataToFirebase(name, prg): Promise<any> {
@@ -252,8 +256,9 @@ export class DatabaseProvider {
               console.log("Download url is " + downloadURL);
               //let key = 'tripDataIndex/'+name;
               //console.log ("key="+key);
-              firebase.database().ref('tripDataIndex/').push()
-                .set({
+              this.afDb.list('tripDataIndex/').push({
+              //firebase.database().ref('tripDataIndex/').push()
+                //.set({
                   'url': downloadURL,
                   'uploadedon': Date(),
                   'uploadedby': this.user.email,

@@ -95,8 +95,6 @@ export class ViewTripsPage {
      console.log('ionViewDidEnter ViewTripsPage');
      this.utils.presentLoader("retrieving trips...", 60000);
     this.cloudGetTripsWithAuth();
-
-
   }
 
   ionViewDidLoad() {
