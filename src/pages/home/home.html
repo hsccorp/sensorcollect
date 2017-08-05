@@ -25,12 +25,14 @@
   <div *ngIf="isOutdated"><small style="color:#D91E18">New app version available. Please update</small></div>
   <b>Sampling @ {{freq}}ms, logging:{{isLogging()}}</b><small> (v:{{getVersion()}})</small>
   <ion-grid>
-    <ion-row> 
-      <ion-col> <!-- start/stip trip -->
+    <ion-row>
+      <ion-col>
+        <!-- start/stip trip -->
         <button ion-button (click)="toggleTrip()" [color]=stateColor icon-left><ion-icon name="car"></ion-icon>{{logState}} Trip {{timer.time}}
         </button>
 
-      </ion-col> <!-- show pause if trip is started -->
+      </ion-col>
+      <!-- show pause if trip is started -->
       <ion-col [hidden]="logState=='Start'">
         <button ion-button (click)="togglePause()" [color]=pauseColor icon-only><ion-icon name="pause"></ion-icon>
         </button>
@@ -42,12 +44,14 @@
       </ion-col>
 
 
-      <ion-col [hidden]="logState=='Stop'"> <!-- show share if trip is stopped -->
+      <ion-col [hidden]="logState=='Stop'">
+        <!-- show share if trip is stopped -->
         <button ion-button icon-left (click)="share()" color="secondary"><ion-icon name="share"></ion-icon>Share</button>
       </ion-col>
 
-      <ion-col [hidden] = "logState=='Stop' || !pendingUpload"> <!-- upload if cloud upload failed -->
-        <button  ion-button  icon-left (click)="uploadPending(currentTripName)" color="dark"><ion-icon name="cloud-upload"></ion-icon>Upload</button>
+      <ion-col [hidden]="logState=='Stop' || !pendingUpload">
+        <!-- upload if cloud upload failed -->
+        <button ion-button icon-left (click)="uploadPending(currentTripName)" color="dark"><ion-icon name="cloud-upload"></ion-icon>Upload</button>
       </ion-col>
     </ion-row>
     <!-- upload progress, activates during upload -->
@@ -60,7 +64,8 @@
   </ion-grid>
 
 
-  <div> <!-- graph or raw -->
+  <div>
+    <!-- graph or raw -->
     <ion-segment [(ngModel)]="viewMode">
       <ion-segment-button value="graph" (ionSelect)="segmentClicked()">
         graph
@@ -82,9 +87,9 @@
     </div>
   </div>
 
-  <ion-fab bottom right  *ngIf="speechAvailable && logState=='Stop'">
-     <button ion-fab color="danger" (click) = "recognizeSpeech()" ><ion-icon name="mic"></ion-icon></button>
+  <ion-fab bottom right *ngIf="speechAvailable && logState=='Stop'">
+    <button ion-fab color="danger" (click)="recognizeSpeech()"><ion-icon name="mic"></ion-icon></button>
   </ion-fab>
 
-   
+
 </ion-content>

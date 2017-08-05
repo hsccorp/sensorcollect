@@ -12,6 +12,9 @@ import { Http } from '@angular/http';
 import { NgZone } from '@angular/core';
 
 
+
+// Commom DB class that abstracts cloud DB and local SQLite DB
+
 @Injectable()
 export class DatabaseProvider {
 
@@ -43,13 +46,14 @@ export class DatabaseProvider {
 
   }
 
-  // write a text string to the logs - used for headers
+  // write a text string to the logs - used for headers at the start and end 
+  // of a trip
   writeString(str) {
     console.log(this.file.dataDirectory + " " + this.logFile + " " + str);
     return this.file.writeFile(this.file.dataDirectory, this.logFile, str, { replace: false, append: true });
   }
 
-  // dump a fragment of logs to a file
+  // dump a fragment of logs to a file 
   writeLog(logs_object) {
     // don't JSON stringify full array as these are chunks
 
@@ -62,6 +66,7 @@ export class DatabaseProvider {
 
   }
 
+  // deletes a trip from firebase DB and firebase storage
   removeTrip(trip) {
     // remove the DB index
     let ref = firebase.database().ref('tripDataIndex/');
@@ -81,6 +86,8 @@ export class DatabaseProvider {
   }
 
 
+  // called in view trips - attaches to DB list in firebase and updates
+  // view. TBD - move view code to view trips
   listTripsDynamic(dispArr, status) {
 
        // any time data changes, this event will be called
@@ -121,9 +128,6 @@ export class DatabaseProvider {
   getDBIndex() {
     return firebase.database().ref('tripDataIndex/');
   }
-
-
- 
 
   logFileLocation() {
     return this.file.dataDirectory + this.logFile;

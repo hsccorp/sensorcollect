@@ -13,18 +13,18 @@
   <button ion-button round icon-left color="danger" (click)="stopScan()">
     <ion-icon name="bluetooth"></ion-icon> Stop Scan</button>
 
-   
-    <ion-list>
-      <ion-spinner *ngIf="isScanning==true" name="circles"></ion-spinner>
-      <ion-item *ngFor="let device of devices" >
-        {{device.name}}
-        <p>{{device.id}}</p>
-        <button ion-button small outline (click)="connect(device)">connect</button>
-      </ion-item>
+
+  <ion-list>
+    <ion-spinner *ngIf="isScanning==true" name="circles"></ion-spinner>
+    <ion-item *ngFor="let device of devices">
+      {{device.name}}
+      <p>{{device.id}}</p>
+      <button ion-button small outline (click)="connect(device)">connect</button>
+    </ion-item>
 
 
-    </ion-list>
-  
+  </ion-list>
+
 
 
 </ion-content>

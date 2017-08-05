@@ -9,16 +9,13 @@ import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { Insomnia } from '@ionic-native/insomnia';
 import { CommonUtilsProvider } from '../../providers/common-utils/common-utils';
 import { DatabaseProvider } from '../../providers/database/database';
-
 import { AlertController } from 'ionic-angular';
 import { ViewTripsPage } from "../view-trips/view-trips";
 import { AlertModalPage } from "../alert-modal/alert-modal";
-import {BlePage} from "../ble/ble";
-import { SpeechRecognition,SpeechRecognitionListeningOptionsAndroid, SpeechRecognitionListeningOptionsIOS } from '@ionic-native/speech-recognition';
+import { BlePage } from "../ble/ble";
+import { SpeechRecognition, SpeechRecognitionListeningOptionsAndroid, SpeechRecognitionListeningOptionsIOS } from '@ionic-native/speech-recognition';
 
 import * as Fuse from 'fuse.js';
-
-
 
 @Component({
   selector: 'page-home',
@@ -36,24 +33,23 @@ export class HomePage {
   // val = what is written in the log
   markers = [
     //  good markers
-    { name: 'turn', val: 'turn', color: 'light' , speech: 'turn'},
+    { name: 'turn', val: 'turn', color: 'light', speech: 'turn' },
     { name: 'brake', val: 'brake', color: 'light', speech: 'brake' },
     { name: 'unknown', val: 'unknown', color: 'light', speech: 'unknown' },
     // bad markers
     { name: 'brake', val: 'hard-brake', color: 'alert', speech: 'hard brake' },
     { name: 'distract', val: 'distract', color: 'alert', speech: 'distract' },
     { name: 'speedup', val: 'speedup', color: 'alert', speech: 'speed up' },
-    { name: 'turn', val: 'sharp-turn', color: 'alert' , speech: 'sharp turn'},
+    { name: 'turn', val: 'sharp-turn', color: 'alert', speech: 'sharp turn' },
   ]
 
-   myFuseOptions: Fuse.FuseOptions = {
+  // will be used for fuzzy search after speech recognition
+  myFuseOptions: Fuse.FuseOptions = {
     caseSensitive: false,
     keys: ['speech'],
     shouldSort: true,
-};
- myFuse = new Fuse(this.markers, this.myFuseOptions);
-
-
+  };
+  myFuse = new Fuse(this.markers, this.myFuseOptions); 
 
   // handles to DOM for graphs
   @ViewChild('acc') accCanvas;
@@ -89,110 +85,108 @@ export class HomePage {
   timer = { 'time': "" }; //trip timer
   currentTripName: string = "";
   pendingUpload: boolean = false; // if true, cloud upload failed
-  remoteVer:string = "0.0.0"; // latest remote app version;
+  remoteVer: string = "0.0.0"; // latest remote app version;
   isOutdated: boolean; // true if new version av.
   logCoords: boolean = true; // if true, will capture latLong
-  speechAvailable:boolean = true; // if false, speech recog will be disabled
-  latestSpeech:string = ""; // will hold latest words
+  speechAvailable: boolean = true; // if false, speech recog will be disabled
+  latestSpeech: string = ""; // will hold latest words
 
   androidOptions: SpeechRecognitionListeningOptionsAndroid;
   iosOptions: SpeechRecognitionListeningOptionsIOS;
 
   // init
-  constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController, public modal:ModalController, public speech:  SpeechRecognition, public db:DatabaseProvider) {
+  constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController, public modal: ModalController, public speech: SpeechRecognition, public db: DatabaseProvider) {
     //, 
 
     plt.ready().then(() => {
       this.db.init();
       this.db.getPendingUpload()
-        .then(succ => { this.pendingUpload = succ.status; this.currentTripName = succ.name; console.log ("PENDING RETURNED "+JSON.stringify(succ)); })
+        .then(succ => { this.pendingUpload = succ.status; this.currentTripName = succ.name; console.log("PENDING RETURNED " + JSON.stringify(succ)); })
       this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Accelerometer');
       this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
 
       this.speech.isRecognitionAvailable()
-      .then((available: boolean) => {console.log("Speech recognition:" + available);
+        .then((available: boolean) => {
+          console.log("Speech recognition:" + available);
           if (!available) {
-            this.utils.presentToast ("Speech recognition not supported", "error");
+            this.utils.presentToast("Speech recognition not supported", "error");
             this.speechAvailable = false;
           }
           else {
             this.getPermission()
-            .then (succ=>{console.log ("Got speech permission");})
-            .catch (err=>{
-              console.log ("Error getting speech permission"); 
-              this.speechAvailable = false;
-              this.utils.presentToast ("Error getting speech permissions", "error");
-            })
+              .then(succ => { console.log("Got speech permission"); })
+              .catch(err => {
+                console.log("Error getting speech permission");
+                this.speechAvailable = false;
+                this.utils.presentToast("Error getting speech permissions", "error");
+              })
 
           }
-    })
+        })
     });
 
   }
 
 
   // credit: https://learnionic2.com/2017/03/30/speech-to-text-with-ionic-2/
-
+  // 
   async getPermission(): Promise<void> {
-  try {
-    let permission = await this.speech.requestPermission();
-    console.log(permission);
-    return permission;
+    try {
+      let permission = await this.speech.requestPermission();
+      console.log(permission);
+      return permission;
+    }
+    catch (e) {
+      console.error(e);
+    }
   }
 
-  
-  catch (e) {
-    console.error(e);
+  async hasPermission(): Promise<boolean> {
+    try {
+      let permission = await this.speech.hasPermission();
+      console.log(permission);
+      return permission;
+    }
+    catch (e) {
+      console.error(e);
+    }
   }
-}
 
-async hasPermission(): Promise<boolean> {
-  try {
-    let permission = await this.speech.hasPermission();
-    console.log(permission);
-    return permission;
-  }
-  catch (e) {
-    console.error(e);
-  }
-}
-
+// called when user taps on the mic
   recognizeSpeech() {
-    console.log ("SPEECH");
+    this.androidOptions = {
+      prompt: 'Please start speaking'
+    }
 
-  this.androidOptions = {
-    prompt: 'Please start speaking'
-  }
- 
-  this.iosOptions = {
-    language: 'en-US'
-  }
- 
-  if (this.plt.is('android')) {
-    this.speech.requestPermission().then (
-      succ=> {
-        this.speech.startListening(this.androidOptions).subscribe(data => {console.log (data); this.latestSpeech = data[0];this.setSpeechMarker(this.latestSpeech)}, 
-        error => console.log(error));
-      }
-    )
-    
-  }
-  else if (this.plt.is('ios')) {
-    this.speech.requestPermission().then (
-      succ=> {
-        this.utils.presentLoader ("Please speak...");
-        setTimeout ( ()=>{
-          this.speech.stopListening();
-          this.utils.removeLoader();
+    this.iosOptions = {
+      language: 'en-US'
+    }
 
-        },3000)
-        this.speech.startListening(this.iosOptions)
-        .subscribe(data => {console.log (data);this.speech.stopListening(); this.latestSpeech = data[0]; this.setSpeechMarker(this.latestSpeech)}, 
-                  error => console.log(error));
-      }
-    )
-    
-  }
+    if (this.plt.is('android')) {
+      this.speech.requestPermission().then(
+        succ => {
+          this.speech.startListening(this.androidOptions).subscribe(data => { console.log(data); this.latestSpeech = data[0]; this.setSpeechMarker(this.latestSpeech) },
+            error => console.log(error));
+        }
+      )
+
+    }
+    else if (this.plt.is('ios')) {
+      this.speech.requestPermission().then(
+        succ => {
+          this.utils.presentLoader("Please speak...");
+          setTimeout(() => {
+            this.speech.stopListening();
+            this.utils.removeLoader();
+
+          }, 3000)
+          this.speech.startListening(this.iosOptions)
+            .subscribe(data => { console.log(data); this.speech.stopListening(); this.latestSpeech = data[0]; this.setSpeechMarker(this.latestSpeech) },
+            error => console.log(error));
+        }
+      )
+
+    }
 
   }
 
@@ -208,27 +202,29 @@ async hasPermission(): Promise<boolean> {
     this.navCtrl.push(ViewTripsPage);
   }
 
+  // hidden for now from ui
   ble() {
     console.log("View BLE");
     this.navCtrl.push(BlePage);
   }
 
+
+  // this is called for a pending trip that was not uploaded to the cloud
   uploadPending(name) {
-
-    console.log ("Trying to upload "+name);
+    console.log("Trying to upload " + name);
     this.upload(this.currentTripName)
-          .then(succ => {
-            console.log("all good with upload");
-            this.db.setPendingUpload(false);
-            this.pendingUpload = false;
-          })
-          .catch(err => {
-            console.log("home bubble up: pending upload failed");
-            this.db.setPendingUpload(true, this.currentTripName);
+      .then(succ => {
+        console.log("all good with upload");
+        this.db.setPendingUpload(false);
+        this.pendingUpload = false;
+      })
+      .catch(err => {
+        console.log("home bubble up: pending upload failed");
+        this.db.setPendingUpload(true, this.currentTripName);
 
-            this.pendingUpload = true;
+        this.pendingUpload = true;
 
-          })
+      })
 
 
   }
@@ -283,14 +279,14 @@ async hasPermission(): Promise<boolean> {
         if (data.coords) {
           // this is meters per sec, convert to mph
           this.speed = data.coords.speed * 2.23694;
-          if (this.isLogging()) { 
+          if (this.isLogging()) {
             if (!this.logCoords) {
               data.coords.latitude = 0;
               data.coords.longitude = 0;
               data.coords.altitude = 0;
 
             }
-            this.storeLog('gps', data.coords); 
+            this.storeLog('gps', data.coords);
           }
         }
       });
@@ -313,52 +309,52 @@ async hasPermission(): Promise<boolean> {
     this.pause = false;
     this.pauseColor = 'dark';
     this.moveCount = 0;
-    
-     let im = this.modal.create(AlertModalPage, {}, {cssClass:"alertModal", enableBackdropDismiss:false});
-     im.onDidDismiss( data => {
-       console.log ("RETURNED: "+JSON.stringify(data));
-       if (data.isCancelled==false) {
-         this.logCoords = data.xy;
-          this.clearArray(); // remove array
-          this.db.deleteLog() // remove log file
-            .then(_ => {
-              // start new log and start trip
-              this.currentTripName = data.name || 'unnamed trip';
-              this.startTripHeader(this.currentTripName);
-              this.toggleButtonState();
-              this.utils.presentToast("trip recording started");
-              this.startAllSensors();
-              this.utils.startTimer(this.timer);
-              // make sure screen stays awake
-              this.insomnia.keepAwake()
-                .then((succ) => { console.log("*** POWER OK **") })
-                .catch((err) => { this.utils.presentToast("could not grab wakelock, screen will dim", "error"); });
-            })
-            .catch(err => { this.utils.presentToast('problem removing log file', 'error'); })
 
-       }
-            
-      })
-     im.present();
+    let im = this.modal.create(AlertModalPage, {}, { cssClass: "alertModal", enableBackdropDismiss: false });
+    im.onDidDismiss(data => {
+      console.log("RETURNED: " + JSON.stringify(data));
+      if (data.isCancelled == false) {
+        this.logCoords = data.xy;
+        this.clearArray(); // remove array
+        this.db.deleteLog() // remove log file
+          .then(_ => {
+            // start new log and start trip
+            this.currentTripName = data.name || 'unnamed trip';
+            this.startTripHeader(this.currentTripName);
+            this.toggleButtonState();
+            this.utils.presentToast("trip recording started");
+            this.startAllSensors();
+            this.utils.startTimer(this.timer);
+            // make sure screen stays awake
+            this.insomnia.keepAwake()
+              .then((succ) => { console.log("*** POWER OK **") })
+              .catch((err) => { this.utils.presentToast("could not grab wakelock, screen will dim", "error"); });
+          })
+          .catch(err => { this.utils.presentToast('problem removing log file', 'error'); })
 
- }
+      }
 
- // aborts a trip without saving 
- abortTrip() {
-  console.log("Inside abort trip");
-  
-  this.utils.stopTimer(this.timer);
-  this.toggleButtonState();
-  this.stopAllSensors();
-  this.insomnia.allowSleepAgain()
+    })
+    im.present();
+
+  }
+
+  // aborts a trip without saving 
+  abortTrip() {
+    console.log("Inside abort trip");
+
+    this.utils.stopTimer(this.timer);
+    this.toggleButtonState();
+    this.stopAllSensors();
+    this.insomnia.allowSleepAgain()
       .then((succ) => { console.log("*** WAKE LOCK RELEASED OK **") })
       .catch((err) => { console.log("Error, releasing wake lock:" + err) });
-  this.db.setPendingUpload(false, this.currentTripName);
-  this.pendingUpload = false;
-  this.utils.presentToast ("Trip Aborted", "success");
+    this.db.setPendingUpload(false, this.currentTripName);
+    this.pendingUpload = false;
+    this.utils.presentToast("Trip Aborted", "success");
 
 
- }
+  }
 
   // stops trip, and associated sensors
   stopTrip() {
@@ -386,7 +382,7 @@ async hasPermission(): Promise<boolean> {
           })
           .catch(err => {
             console.log("home bubble up: upload failed in stop trip");
-            console.log (JSON.stringify(err));
+            console.log(JSON.stringify(err));
             this.db.setPendingUpload(true, this.currentTripName);
             this.pendingUpload = true;
 
@@ -491,8 +487,8 @@ async hasPermission(): Promise<boolean> {
 
   // uses speech recognition - may not be accurate words, so lets differentiate
   setSpeechMarker(str) {
-    str = this.speechSanitize (str);
-    console.log ("SPEECH MARKER " + str);
+    str = this.speechSanitize(str);
+    console.log("SPEECH MARKER " + str);
     this.storeLog('SpeechMarker', str);
     this.utils.presentToast(str + ' marker set', 'success', 1500);
     // restart recording if paused
@@ -501,26 +497,26 @@ async hasPermission(): Promise<boolean> {
 
   // corrects some common speech snafus
   // will heavily depend on accent
-  speechSanitize (str) {
+  speechSanitize(str) {
     let s = str.toLowerCase();
     let fuzzy = this.myFuse.search(s);
 
     if (!fuzzy.length) {
-      console.log ("Fuzzy search failed, going with manual sanitization");
-      s = s.replace ("heartbreak", "hard brake");
-      s = s.replace (/break/g, "brake");
-      s = s.replace (/heart/g, "hard");
-      s = s.replace (/speed up/g, "speedup");
-      s = s.replace (/ /g, "-");
+      console.log("Fuzzy search failed, going with manual sanitization");
+      s = s.replace("heartbreak", "hard brake");
+      s = s.replace(/break/g, "brake");
+      s = s.replace(/heart/g, "hard");
+      s = s.replace(/speed up/g, "speedup");
+      s = s.replace(/ /g, "-");
     }
     else {
       s = fuzzy[0]["val"];
-      console.log ("Fuzzy returned: "+s);
+      console.log("Fuzzy returned: " + s);
     }
-    
 
-    console.log ("FUZE");
-    console.log (this.myFuse.search(str));
+
+    console.log("FUZE");
+    console.log(this.myFuse.search(str));
     return s;
 
   }
@@ -728,15 +724,15 @@ async hasPermission(): Promise<boolean> {
   }
 
   ionViewDidLoad() {
-      this.plt.ready().then(() => {
+    this.plt.ready().then(() => {
       this.utils.getRemoteVersion()
-      .then (ver => {
-        this.remoteVer = ver;
-        let localver = this.utils.getVersion();
-        console.log (`remote: ${this.remoteVer}, local: ${localver}`);
-        let c = this.utils.versionCompare(localver, this.remoteVer);
-        if (c == -1) this.isOutdated = true;
-      })
+        .then(ver => {
+          this.remoteVer = ver;
+          let localver = this.utils.getVersion();
+          console.log(`remote: ${this.remoteVer}, local: ${localver}`);
+          let c = this.utils.versionCompare(localver, this.remoteVer);
+          if (c == -1) this.isOutdated = true;
+        })
     })
   }
 

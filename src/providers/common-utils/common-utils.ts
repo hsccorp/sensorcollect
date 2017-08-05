@@ -10,7 +10,7 @@ import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 
 
-const versionUrl:string = "https://raw.githubusercontent.com/hsccorp/sensorcollect/master/version.txt";
+const versionUrl: string = "https://raw.githubusercontent.com/hsccorp/sensorcollect/master/version.txt";
 
 // TBD: firebase stuff is here too - need to move it out to its own service
 
@@ -23,7 +23,7 @@ export class CommonUtilsProvider {
 
 
 
-  constructor(public toastCtrl: ToastController, public loadingCtrl: LoadingController, public alert: AlertController, public appVersion: AppVersion, public plt: Platform, public http:Http) {
+  constructor(public toastCtrl: ToastController, public loadingCtrl: LoadingController, public alert: AlertController, public appVersion: AppVersion, public plt: Platform, public http: Http) {
 
     plt.ready().then(() => {
       this.appVersion.getVersionNumber()
@@ -32,16 +32,16 @@ export class CommonUtilsProvider {
     })
   }
 
-  getRemoteVersion(): Promise <any> {
-    let url = versionUrl+"?random="+Math.random();
+  getRemoteVersion(): Promise<any> {
+    let url = versionUrl + "?random=" + Math.random();
     return new Promise((resolve, reject) => {
-        this.http.get(url).map(res=>res).subscribe(data => {
-            let ver = data["_body"];
-            console.log ("Latest app version:"+ver);
-            resolve(ver);
-        },
-          err => {console.log ("Latest App version error:"+JSON.stringify(err)); reject(err);}
-        
+      this.http.get(url).map(res => res).subscribe(data => {
+        let ver = data["_body"];
+        console.log("Latest app version:" + ver);
+        resolve(ver);
+      },
+        err => { console.log("Latest App version error:" + JSON.stringify(err)); reject(err); }
+
       );
     });
   }
@@ -82,36 +82,30 @@ export class CommonUtilsProvider {
     toast.present();
   }
 
-  
 
-
-//credit: https://gist.github.com/alexey-bass/1115557
-versionCompare(left, right)
-{
+  //credit: https://gist.github.com/alexey-bass/1115557
+  versionCompare(left, right) {
     if (typeof left + typeof right != 'stringstring')
-        return false;
+      return false;
 
     var a = left.split('.');
     var b = right.split('.');
     var i = 0;
     var len = Math.max(a.length, b.length);
 
-    for (; i < len; i++)
-    {
-        if ((a[i] && !b[i] && parseInt(a[i]) > 0) || (parseInt(a[i]) > parseInt(b[i])))
-        {
-            return 1;
-        }
-        else if ((b[i] && !a[i] && parseInt(b[i]) > 0) || (parseInt(a[i]) < parseInt(b[i])))
-        {
-            return -1;
-        }
+    for (; i < len; i++) {
+      if ((a[i] && !b[i] && parseInt(a[i]) > 0) || (parseInt(a[i]) > parseInt(b[i]))) {
+        return 1;
+      }
+      else if ((b[i] && !a[i] && parseInt(b[i]) > 0) || (parseInt(a[i]) < parseInt(b[i]))) {
+        return -1;
+      }
     }
 
     return 0;
-}
+  }
 
-  
+
 
   // start a trip timer
   startTimer(timer) {
@@ -120,13 +114,25 @@ versionCompare(left, right)
   }
 
 
+// checks if obj is present in array a
+  contains(a, obj) {
+    for (var i = 0; i < a.length; i++) {
+      if (a[i].id == obj.id) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   // stop trip timer
   stopTimer(timer) {
     this.timer.unsubscribe();
     timer.time = "";
   }
 
-  
 
- 
+
+
+
+
 }

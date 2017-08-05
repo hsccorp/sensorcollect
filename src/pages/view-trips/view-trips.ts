@@ -75,12 +75,7 @@ export class ViewTripsPage {
 
   // TBD: Handle offline error
   cloudGetTrips() {
-    
     this.db.listTripsDynamic (this.trips,this.status);
-
-    
-
- 
   }
 
   // authenticates and then downloads
