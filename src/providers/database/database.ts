@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { ToastController, LoadingController, AlertController } from 'ionic-angular';
 import { CommonUtilsProvider } from '../common-utils/common-utils';
-import { AngularFireDatabaseModule, AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import { AngularFireAuth } from 'angularfire2/auth';
+
 import * as firebase from 'firebase/app';
 import 'firebase/storage';
 import { Storage } from '@ionic/storage';
@@ -20,10 +22,7 @@ export class DatabaseProvider {
 
   logFile: string = 'triplog.txt';
   user: { email: string, password: string } = { email: '', password: '' };
-
-  constructor(public toastCtrl: ToastController, public loadingCtrl: LoadingController, public file: File, public storage: Storage, public alert: AlertController, public utils: CommonUtilsProvider, public zone:NgZone, public http:Http, public db: AngularFireDatabase,) {
-    console.log('Hello DatabaseProvider Provider');
-
+  constructor(public toastCtrl: ToastController, public loadingCtrl: LoadingController, public file: File, public storage: Storage, public alert: AlertController, public utils: CommonUtilsProvider, public zone: NgZone, public http: Http, public afDb: AngularFireDatabase, public afAuth: AngularFireAuth) {
     storage.ready().then(() => {
       console.log("Storage engine is:" + storage.driver)
     })
@@ -56,30 +55,19 @@ export class DatabaseProvider {
   // dump a fragment of logs to a file 
   writeLog(logs_object) {
     // don't JSON stringify full array as these are chunks
-
     let str = "";
     for (let i = 0; i < logs_object.length; i++) {
       str = str + "              " + JSON.stringify(logs_object[i]) + "," + "\n";
     }
-
     return this.file.writeFile(this.file.dataDirectory, this.logFile, str, { replace: false, append: true });
 
   }
 
   // deletes a trip from firebase DB and firebase storage
-  removeTrip(trip) {
-    // remove the DB index
-    let ref = firebase.database().ref('tripDataIndex/');
-    ref.child(trip.id).remove()
-      .then(succ => this.utils.presentToast("trip deleted"))
-      .catch(err => {
-        this.utils.presentToast("error deleting trip", "error");
-        console.log("Error:" + JSON.stringify(err));
-      })
-
-
+  removeTripStorage(store) {
+    console.log("Storage: " + store);
     // also delete the actual log file associated to the DB
-    let sref = firebase.storage().ref().child(trip.storageRef);
+    let sref = firebase.storage().ref().child(store);
     sref.delete()
       .then(succ => { console.log("Storage deleted too"); })
       .catch(err => { console.log("Error deleting storage:" + JSON.stringify(err)) })
@@ -88,40 +76,18 @@ export class DatabaseProvider {
 
   // called in view trips - attaches to DB list in firebase and updates
   // view. TBD - move view code to view trips
-  listTripsDynamic(dispArr, status) {
-
-       // any time data changes, this event will be called
+  getTripsInDB() {
+    let ltrips: any[] = [];
+    // any time data changes, this event will be called
     // so deletions are automatically taken care of
-    this.utils.presentLoader("retrieving trips...", 60000);
-    
-        let ref = firebase.database().ref('tripDataIndex/');
-    ref.limitToLast(300).on('value', (snapshot) => {
-      let result = snapshot.val();
-      let ltrips: any[] = [];
-      //console.log (JSON.stringify(result));
-      for (let k in result) {
-      console.log ("Pushing "+result[k].name);
-        ltrips.unshift({
-          id: k,
-          url: result[k].url,
-          date: result[k].uploadedon,
-          uploadedby: result[k].uploadedby,
-          name: result[k].name,
-          version: result[k].version,
-          storageRef: result[k].storageRef
-        });
 
-      }
-      // the array update can occur outside Angular's refresh digest
-      this.zone.run(() => {
-        dispArr.data = ltrips;
-        if (!dispArr.data.length) {status.text = "No trips found"}
-        this.utils.removeLoader();
+    return this.afDb.list('tripDataIndex/',
+      {
+        query: {
+          limitToLast: 300
+        }
+      }).map(array => array.reverse()) as FirebaseListObservable<any[]>;;
 
-      })
-
-    },
-    (error)=>{this.utils.removeLoader();this.utils.presentToast("Error accessing data","error")});
 
   }
 
@@ -214,7 +180,7 @@ export class DatabaseProvider {
             })
         }
         else {
-          console.log ("doAuthWithPassword callign doAuth");
+          console.log("doAuthWithPassword callign doAuth");
           return this.doAuth(user.email, user.password)
         };
 
@@ -228,7 +194,9 @@ export class DatabaseProvider {
       console.log(`->Inside doAuth with ${u}:${p}`);
       this.user.email = u;
       this.user.password = p;
-      firebase.auth().signInWithEmailAndPassword(u, p)
+
+      this.afAuth.auth.signInWithEmailAndPassword(u, p)
+        //firebase.auth().signInWithEmailAndPassword(u, p)
         .then(succ => {
           console.log("**** Signed in");
           resolve(succ);

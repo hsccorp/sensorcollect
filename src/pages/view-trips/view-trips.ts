@@ -1,24 +1,24 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
-import { CommonUtilsProvider } from 
-'../../providers/common-utils/common-utils';
+import { CommonUtilsProvider } from
+  '../../providers/common-utils/common-utils';
 import { DatabaseProvider } from '../../providers/database/database';
 
 import { NgZone } from '@angular/core';
 import { SocialSharing } from '@ionic-native/social-sharing';
 import { ItemSliding } from 'ionic-angular';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
+import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
 @Component({
   selector: 'page-view-trips',
   templateUrl: 'view-trips.html',
 })
 export class ViewTripsPage {
-  trips: {data:any[]}  = {data:[]};
-  status = {text:"loading trips..."};
+  trips: FirebaseListObservable<any[]>;
+  status = { text: "loading trips..." };
 
-
-  constructor(public navCtrl: NavController, public navParams: NavParams, public utils: CommonUtilsProvider, public zone: NgZone, public socialSharing: SocialSharing, public iab: InAppBrowser, public db:DatabaseProvider) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public utils: CommonUtilsProvider, public zone: NgZone, public socialSharing: SocialSharing, public iab: InAppBrowser, public db: DatabaseProvider) {
   }
 
   // displays the trip log in a new window
@@ -26,11 +26,8 @@ export class ViewTripsPage {
     slider.close();
     this.utils.presentLoader("loading trip...");
     const browser = this.iab.create(trip.url, "_blank", "enableViewPortScale=yes,closebuttoncaption=Done");
-
     browser.on('loadstop').subscribe(resp => { console.log("STOP"); this.utils.removeLoader() });
     browser.on('loaderror').subscribe(resp => { console.log("ERROR"); this.utils.removeLoader() });
-
-
   }
 
   // tbd - this view already logs in, so relogin on 
@@ -46,9 +43,9 @@ export class ViewTripsPage {
       this.utils.presentToast("Trip not uploaded by you", "error", 3000);
       return;
     }
-    this.db.removeTrip(trip);
-    
-
+    let sref = trip.storageRef;
+    this.trips.remove(trip.$key);
+    this.db.removeTripStorage(sref);
   }
 
   // social sharing for the selected trip
@@ -75,8 +72,17 @@ export class ViewTripsPage {
 
   // TBD: Handle offline error
   cloudGetTrips() {
-    this.db.listTripsDynamic (this.trips,this.status);
+    this.utils.presentLoader("retrieving trips...", 60000);
+    this.trips = this.db.getTripsInDB();
+
+    this.trips
+      .subscribe(items => {
+        console.log("***CHANGED***");
+        //console.log (JSON.stringify(items));
+        this.utils.removeLoader();
+      })
   }
+
 
   // authenticates and then downloads
   cloudGetTripsWithAuth() {

@@ -7,17 +7,17 @@
 
 
 <ion-content padding>
-   <div *ngIf = "trips.data.length">
-      <p text-wrap *ngIf="trips.data.length">swipe items for options</p>
-    </div>
+   <!--<div *ngIf = "trips.length">
+      <p text-wrap *ngIf="trips.length">swipe items for options</p>
+    </div>-->
   <ion-list nolines>
-    <ion-item *ngIf="!trips.data.length">
+    <!--<ion-item *ngIf="!trips.length">
      {{this.status.text}}
-    </ion-item>
-    <ion-item-sliding #slidingItem *ngFor="let trip of trips.data">
+    </ion-item>-->
+    <ion-item-sliding #slidingItem *ngFor="let trip of trips | async">
       <ion-item>
         {{trip.name}}
-        <p>{{trip.date}}</p>
+        <p>{{trip.uploadedon}}</p>
         <p>{{trip.uploadedby}}, version:{{trip.version}}</p>
       </ion-item>
       <ion-item-options>

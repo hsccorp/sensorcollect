@@ -100,7 +100,7 @@ export class HomePage {
 
     plt.ready().then(() => {
       this.db.init();
-      this.db.getPendingUpload()
+      this.db.getPendingUpload() // do we have a trip that did not upload?
         .then(succ => { this.pendingUpload = succ.status; this.currentTripName = succ.name; console.log("PENDING RETURNED " + JSON.stringify(succ)); })
       this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Accelerometer');
       this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
