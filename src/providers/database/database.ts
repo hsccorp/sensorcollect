@@ -4,6 +4,7 @@ import { CommonUtilsProvider } from '../common-utils/common-utils';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
 import * as firebase from 'firebase/app';
+import { FirebaseApp } from 'angularfire2';
 import 'firebase/storage';
 import { Storage } from '@ionic/storage';
 import { File } from '@ionic-native/file';
@@ -20,7 +21,7 @@ export class DatabaseProvider {
 
   logFile: string = 'triplog.txt';
   user: { email: string, password: string } = { email: '', password: '' };
-  constructor(public toastCtrl: ToastController, public loadingCtrl: LoadingController, public file: File, public storage: Storage, public alert: AlertController, public utils: CommonUtilsProvider, public zone: NgZone, public http: Http, public afDb: AngularFireDatabase, public afAuth: AngularFireAuth) {
+  constructor(public toastCtrl: ToastController, public loadingCtrl: LoadingController, public file: File, public storage: Storage, public alert: AlertController, public utils: CommonUtilsProvider, public zone: NgZone, public http: Http, public afDb: AngularFireDatabase, public afAuth: AngularFireAuth, public fb:FirebaseApp) {
     storage.ready().then(() => {
       console.log("Storage engine is:" + storage.driver)
     })
@@ -189,7 +190,7 @@ export class DatabaseProvider {
   removeTripStorage(store) {
     console.log("Storage: " + store);
     // also delete the actual log file associated to the DB
-    let sref = firebase.storage().ref().child(store);
+    let sref = this.fb.storage().ref().child(store);
     sref.delete()
       .then(succ => { console.log("Storage deleted too"); })
       .catch(err => { console.log("Error deleting storage:" + JSON.stringify(err)) })
@@ -199,7 +200,6 @@ export class DatabaseProvider {
   // called in view trips - attaches to DB list in firebase and updates
   // view. TBD - move view code to view trips
   getTripsInDB() {
-    let ltrips: any[] = [];
     // any time data changes, this event will be called
     // so deletions are automatically taken care of
 
@@ -214,7 +214,7 @@ export class DatabaseProvider {
   }
 
   getDBIndex() {
-    return firebase.database().ref('tripDataIndex/');
+    return this.fb.database().ref('tripDataIndex/');
   }
 
 
@@ -226,7 +226,7 @@ export class DatabaseProvider {
 
       console.log("cloud upload called for " + name);
       //this.presentLoader("loading...");
-      let storageRef = firebase.storage().ref();
+      let storageRef = this.fb.storage().ref();
       console.log("storage ref is " + storageRef);
       return this.file.readAsArrayBuffer(this.file.dataDirectory, this.logFile)
         .then(succ => {
