@@ -39,56 +39,71 @@
       </ion-col>
       <!-- show pause if trip is started -->
       <ion-col [hidden]="logState=='Start'">
-        <button ion-button (click)="togglePause()" [color]=pauseColor icon-only><ion-icon name="pause"></ion-icon>
+        <button ion-button (click)="togglePause()" [color]=pauseColor icon-only outline><ion-icon name="pause"></ion-icon>
         </button>
       </ion-col>
 
       <ion-col [hidden]="logState=='Start'">
-        <button ion-button (click)="abortTrip()" color="alert" icon-only><ion-icon name="close-circle"></ion-icon>
+        <button ion-button outline (click)="abortTrip()" color="alert" icon-only><ion-icon name="close-circle"></ion-icon>
         </button>
       </ion-col>
 
 
       <ion-col [hidden]="logState=='Stop'">
         <!-- show share if trip is stopped -->
-        <button ion-button icon-left (click)="share()" color="secondary"><ion-icon name="share"></ion-icon>Share</button>
+        <button ion-button icon-left outline (click)="share()" color="primary"><ion-icon name="share"></ion-icon>Share</button>
       </ion-col>
 
       <ion-col [hidden]="logState=='Stop' || !pendingUpload">
         <!-- upload if cloud upload failed -->
-        <button ion-button icon-left (click)="uploadPending(currentTripName)" color="dark"><ion-icon name="cloud-upload"></ion-icon>Upload</button>
+        <button ion-button icon-left (click)="uploadPending(currentTripName)" color="primary" outline><ion-icon name="cloud-upload"></ion-icon>Upload</button>
       </ion-col>
     </ion-row>
     <!-- upload progress, activates during upload -->
     <progress-bar [progress]="progress.val" *ngIf="progress.val!=-1"></progress-bar>
     <ion-row wrap [hidden]='logState=="Start"'>
       <ion-col col-3 *ngFor="let marker of markers">
-        <button ion-button small [color]="marker.color" (click)="setMarker(marker.val)">{{marker.name}}</button>
+        <button ion-button small [color]="marker.color" outline (click)="setMarker(marker.val)">{{marker.name}}</button>
       </ion-col>
     </ion-row>
   </ion-grid>
 
 
+
+  <!-- graph or raw -->
   <div>
-    <!-- graph or raw -->
     <ion-segment [(ngModel)]="viewMode">
-      <ion-segment-button value="graph" (ionSelect)="segmentClicked()">
+      <ion-segment-button value="graph" (ionSelect)="chartClicked()">
         graph
       </ion-segment-button>
-      <ion-segment-button value="raw">
+      <ion-segment-button value="raw" (ionSelect)="rawClicked()">
         raw
       </ion-segment-button>
     </ion-segment>
   </div>
-  <p>Distract:{{move}} ({{moveCount}} times), Speed:{{speed | number:'1.2-2'}}mph</p>
+
+  <p>Distracted: {{move}} ({{moveCount}} times), Speed: {{speed | number:'1.2-2'}}mph, viewMode: {{viewMode}}</p>
   <div [ngSwitch]="viewMode">
     <div *ngSwitchCase="'raw'">
-      <h4>Acceleration:</h4> {{acc}}
-      <h4>Gyroscope:</h4> {{gyro}}
+      <ion-list nolines>
+        <ion-item>
+          acclerometer
+          <p text-wrap>{{acc}}</p>
+        </ion-item>
+
+        <ion-item>
+          gyroscope
+          <p text-wrap>{{gyro}}</p>
+        </ion-item>
+
+      </ion-list>
+
     </div>
+
     <div *ngSwitchCase="'graph'">
-      <canvas #acc></canvas>
-      <canvas #gyro></canvas>
+      <canvas #accGraph></canvas>
+      <canvas #gyroGraph></canvas>
+
     </div>
   </div>
 

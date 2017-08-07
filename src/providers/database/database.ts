@@ -146,7 +146,7 @@ export class DatabaseProvider {
   doAuthWithPrompt(): Promise<any> {
     return this.getUser()
       .then(user => {
-        console.log("Got user:" + JSON.stringify(user));
+        //console.log("Got user:" + JSON.stringify(user));
         if (user == undefined || !user.email || !user.password) {
           return this.promptForPassword()
             .then(data => {
@@ -206,7 +206,8 @@ export class DatabaseProvider {
     return this.afDb.list('tripDataIndex/',
       {
         query: {
-          limitToLast: 300
+          orderByChild: 'createdOn',
+          limitToFirst:300
         }
       });
 
@@ -256,6 +257,8 @@ export class DatabaseProvider {
               console.log("Download url is " + downloadURL);
               //let key = 'tripDataIndex/'+name;
               //console.log ("key="+key);
+            
+              let revDate = 0 - new Date().getTime();
               this.afDb.list('tripDataIndex/').push({
               //firebase.database().ref('tripDataIndex/').push()
                 //.set({
@@ -264,7 +267,8 @@ export class DatabaseProvider {
                   'uploadedby': this.user.email,
                   'name': name,
                   'version': this.utils.getVersion(),
-                  'storageRef': `tripdata/${name}.txt`
+                  'storageRef': `tripdata/${name}.txt`,
+                  'createdOn':revDate
                 })
                 .then(succ => { this.utils.presentToast("upload complete"); resolve(succ) })
                 .catch(err => { console.log("ERROR " + err); this.utils.presentToast("error creating index", "error"); reject(err) })

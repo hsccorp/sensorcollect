@@ -26,10 +26,11 @@ import { IonicStorageModule } from '@ionic/storage';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { AppVersion } from '@ionic-native/app-version';
 import { HttpModule } from '@angular/http';
-import { BLE } from '@ionic-native/ble';
-import {BlePage} from "../pages/ble/ble";
+//import { BLE } from '@ionic-native/ble';
+//import {BlePage} from "../pages/ble/ble";
 import { SpeechRecognition } from '@ionic-native/speech-recognition';
 import { DatabaseProvider } from '../providers/database/database';
+import { ReversePipe } from '../pipes/reverse/reverse';
 
 
 
@@ -51,7 +52,8 @@ import { DatabaseProvider } from '../providers/database/database';
     ViewTripsPage,
     AlertModalPage,
     ProgressBarComponent,
-    BlePage
+    //BlePage,
+    ReversePipe
   ],
   imports: [
     AngularFireModule.initializeApp(firebaseConfig),
@@ -68,7 +70,7 @@ import { DatabaseProvider } from '../providers/database/database';
     HomePage,
     ViewTripsPage,
     AlertModalPage,
-    BlePage
+    //BlePage
   ],
   providers: [
     Geolocation,
@@ -83,7 +85,7 @@ import { DatabaseProvider } from '../providers/database/database';
     File,
     InAppBrowser,
     AppVersion,
-    BLE,
+    //BLE,
     SpeechRecognition,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     DatabaseProvider

@@ -17,7 +17,10 @@ export class BlePage {
   isScanning: boolean = false;
   devices = [];
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public ble: BLE, public zone: NgZone, public utils: CommonUtilsProvider) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public ble: BLE,public zone: NgZone, public utils: CommonUtilsProvider) {
+
+    console.log (">>>> Inside BLE ");   
+
   }
 
 
@@ -65,5 +68,4 @@ export class BlePage {
   ionViewDidLoad() {
     console.log('ionViewDidLoad BlePage');
   }
-
 }
