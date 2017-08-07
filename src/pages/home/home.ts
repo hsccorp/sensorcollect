@@ -72,7 +72,7 @@ export class HomePage {
   gyro: any; // latest gyro data
   logState: string = 'Start'; // button state
   pause: boolean = false; // true if recording paused
-  pauseColor: string = 'dark';
+  pauseColor: string = 'secondary';
   stateColor: string = 'primary'; // button color
   logs: any[] = []; // will hold history of acc + gyr data
   logRows: number = 0;
@@ -318,13 +318,13 @@ export class HomePage {
   // pauses recording without stopping trips
   togglePause() {
     this.pause = !this.pause;
-    this.pauseColor = (this.pauseColor == 'dark') ? 'primary' : 'dark';
+    this.pauseColor = (this.pauseColor == 'secondary') ? 'primary' : 'secondary';
   }
 
   // init code to start a trip
   startTrip() {
     this.pause = false;
-    this.pauseColor = 'dark';
+    this.pauseColor = 'secondary';
     this.moveCount = 0;
 
     let im = this.modal.create(AlertModalPage, {}, { cssClass: "alertModal", enableBackdropDismiss: false });
@@ -428,23 +428,27 @@ export class HomePage {
   // given a sensor object, updates graph and log 
   process(object, chart, type) {
     if (!this.dirty) { // let's make sure there is no race when chart is re-creating
-      chart.data.datasets[0].data.shift();
-      chart.data.datasets[0].data.push(object.x);
-      chart.data.labels.shift();
-      chart.data.labels.push("");
-      chart.data.datasets[1].data.shift();
-      chart.data.datasets[1].data.push(object.y);
-      chart.data.labels.shift();
-      chart.data.labels.push("");
-      chart.data.datasets[2].data.shift();
-      chart.data.datasets[2].data.push(object.z);
-      chart.data.labels.shift();
-      chart.data.labels.push("");
+      
       // I don't think zone.run will work here
       // we need time for the view to render first?
       setTimeout(() => {
-        chart.update();
+        
+        chart.data.datasets[0].data.push(object.x);
+        chart.data.datasets[1].data.push(object.y);
+        chart.data.datasets[2].data.push(object.z);
+        chart.data.labels.push("");
+
+        chart.data.datasets[0].data.shift();
+        chart.data.datasets[1].data.shift();
+        chart.data.datasets[2].data.shift();
+        chart.data.labels.shift();
+
+        chart.update(0);
+      
       }, 100);
+
+      
+
     }
     else {
       console.log("dirty");
@@ -727,6 +731,12 @@ export class HomePage {
           text: title,
         },
         responsive: true,
+        
+      animation: {
+        duration: 300,
+        easing: 'easeInOutQuart'
+      },
+      
         scales: {
           xAxes: [{
             gridLines: {
