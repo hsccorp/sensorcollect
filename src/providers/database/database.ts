@@ -208,7 +208,7 @@ export class DatabaseProvider {
         query: {
           limitToLast: 300
         }
-      }).map(array => array.reverse()) as FirebaseListObservable<any[]>;;
+      });
 
 
   }

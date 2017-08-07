@@ -14,7 +14,7 @@
     <!--<ion-item *ngIf="!trips.length">
      {{this.status.text}}
     </ion-item>-->
-    <ion-item-sliding #slidingItem *ngFor="let trip of trips | async">
+    <ion-item-sliding #slidingItem *ngFor="let trip of trips| async">
       <ion-item>
         {{trip.name}}
         <p>{{trip.uploadedon}}</p>

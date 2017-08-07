@@ -3,12 +3,13 @@ import { NavController, NavParams } from 'ionic-angular';
 import { CommonUtilsProvider } from
   '../../providers/common-utils/common-utils';
 import { DatabaseProvider } from '../../providers/database/database';
+import {ReversePipe} from "../../pipes/reverse/reverse";
 
 import { NgZone } from '@angular/core';
 import { SocialSharing } from '@ionic-native/social-sharing';
 import { ItemSliding } from 'ionic-angular';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
-import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import {FirebaseListObservable } from 'angularfire2/database';
 
 @Component({
   selector: 'page-view-trips',
@@ -75,12 +76,14 @@ export class ViewTripsPage {
     
     this.trips = this.db.getTripsInDB();
 
+
     this.trips
       .subscribe(items => {
         console.log("***CHANGED***");
         //console.log (JSON.stringify(items));
         this.utils.removeLoader();
       })
+      
   }
 
 
@@ -88,7 +91,7 @@ export class ViewTripsPage {
   cloudGetTripsWithAuth() {
     this.db.doAuthWithPrompt()
       .then(succ => { this.cloudGetTrips() })
-      .catch(err => { });
+      .catch(err => { this.utils.removeLoader();});
   }
 
   ionViewDidEnter() {
