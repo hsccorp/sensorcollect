@@ -14,6 +14,7 @@ import { ViewTripsPage } from "../view-trips/view-trips";
 import { AlertModalPage } from "../alert-modal/alert-modal";
 import { BlePage } from "../ble/ble";
 import { SpeechRecognition, SpeechRecognitionListeningOptionsAndroid, SpeechRecognitionListeningOptionsIOS } from '@ionic-native/speech-recognition';
+import { NgZone } from '@angular/core';
 
 import * as Fuse from 'fuse.js';
 
@@ -21,6 +22,8 @@ import * as Fuse from 'fuse.js';
   selector: 'page-home',
   templateUrl: 'home.html'
 })
+
+
 
 export class HomePage {
   // will hold subscriptions to sensors
@@ -43,17 +46,19 @@ export class HomePage {
     { name: 'turn', val: 'sharp-turn', color: 'alert', speech: 'sharp turn' },
   ]
 
+
+
   // will be used for fuzzy search after speech recognition
   myFuseOptions: Fuse.FuseOptions = {
     caseSensitive: false,
     keys: ['speech'],
     shouldSort: true,
   };
-  myFuse = new Fuse(this.markers, this.myFuseOptions); 
+  myFuse = new Fuse(this.markers, this.myFuseOptions);
 
   // handles to DOM for graphs
-  @ViewChild('acc') accCanvas;
-  @ViewChild('gyro') gyroCanvas;
+  @ViewChild('accGraph') accCanvas;
+  @ViewChild('gyroGraph') gyroCanvas;
 
   // models for DOM charts
   charts: {
@@ -95,15 +100,19 @@ export class HomePage {
   iosOptions: SpeechRecognitionListeningOptionsIOS;
 
   // init
-  constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController, public modal: ModalController, public speech: SpeechRecognition, public db: DatabaseProvider) {
+  constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController, public modal: ModalController, public speech: SpeechRecognition, public db: DatabaseProvider, public zone: NgZone) {
     //, 
 
     plt.ready().then(() => {
+      if (this.plt.is('ios')) {
+        console.log (">>>>>>>>>>>>>> HACKING BACKGROUND COLOR");
+         window['plugins'].webviewcolor.change('#000');
+      }
+     
       this.db.init();
       this.db.getPendingUpload() // do we have a trip that did not upload?
         .then(succ => { this.pendingUpload = succ.status; this.currentTripName = succ.name; console.log("PENDING RETURNED " + JSON.stringify(succ)); })
-      this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Accelerometer');
-      this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
+
 
       this.speech.isRecognitionAvailable()
         .then((available: boolean) => {
@@ -152,7 +161,7 @@ export class HomePage {
     }
   }
 
-// called when user taps on the mic
+  // called when user taps on the mic
   recognizeSpeech() {
     this.androidOptions = {
       prompt: 'Please start speaking'
@@ -192,7 +201,7 @@ export class HomePage {
 
   clearLogin() {
     this.db.clearUser();
-    this.utils.presentToast ("cleared user");
+    this.utils.presentToast("cleared user");
 
   }
 
@@ -208,10 +217,10 @@ export class HomePage {
   }
 
   // hidden for now from ui
-  ble() {
+  /*ble() {
     console.log("View BLE");
     this.navCtrl.push(BlePage);
-  }
+  }*/
 
 
   // this is called for a pending trip that was not uploaded to the cloud
@@ -260,14 +269,17 @@ export class HomePage {
   startAllSensors() {
     // listen to acc. data
     this.accSub = this.deviceMotion.watchAcceleration({ frequency: this.freq }).subscribe((acceleration: DeviceMotionAccelerationData) => {
-      this.process(acceleration, this.charts.accChart, 'acc');
+
+      this.zone.run(() => { this.process(acceleration, this.charts.accChart, 'acc'); });
+
     });
 
     // listen to gyro data
     this.gyrSub = this.gyroscope.watch({ frequency: this.freq })
       .subscribe((gyroscope: GyroscopeOrientation) => {
         //console.log("Gyro:" + JSON.stringify(gyroscope));
-        this.process(gyroscope, this.charts.gyroChart, 'gyro');
+        this.zone.run(() => { this.process(gyroscope, this.charts.gyroChart, 'gyro'); });
+
 
       });
 
@@ -646,16 +658,21 @@ export class HomePage {
     alert.present();
   }
 
+
+  rawClicked() {
+    console.log("raw clicked");
+  }
   // given that DOM elements are removed on switching segments
   // we need to redraw/reattach charts
 
-  segmentClicked() {
+  chartClicked() {
     this.utils.presentLoader("charting graph..");
     this.dirty = true;
-    this.charts.accChart.destroy();
-    this.charts.gyroChart.destroy();
+    
     setTimeout(() => {
       console.log("re-drawing chart..");
+      this.charts.accChart.destroy();
+      this.charts.gyroChart.destroy();
       this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Accelerometer');
       this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
       ;
@@ -667,7 +684,8 @@ export class HomePage {
   createChart(charthandle, elem, type, title = '') {
     console.log("*** Creating Chart");
     let chart;
-    chart = new Chart(elem, {
+
+     chart = new Chart(elem, {
 
       type: 'line',
       data: {
@@ -677,26 +695,29 @@ export class HomePage {
             label: 'X',
             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             //backgroundColor: 'rgb(255,0,0)',
-            borderColor: 'rgb(255,0,0)',
+            borderColor: '#ad2719',
+            backgroundColor: 'rgba(231, 76, 60,0.4)',
             borderWidth: 2,
-            fill: false,
+            fill: true,
           },
           {
             label: 'Y',
             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             //backgroundColor: 'rgb(255,0,0)',
-            borderColor: 'rgb(0,255,0)',
+            borderColor: '#148744',
+            backgroundColor: 'rgba(39, 174, 96,0.4)',
             borderWidth: 2,
-            fill: false,
+            fill: true,
           },
 
           {
             label: 'Z',
             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             //backgroundColor: 'rgb(255,0,0)',
-            borderColor: 'rgb(0,0,255)',
+            borderColor: 'rgba(142, 68, 173,1.0)',
+            backgroundColor: 'rgba(155, 89, 182,0.3)',
             borderWidth: 2,
-            fill: false,
+            fill: true,
           },
         ]
       },
@@ -707,9 +728,17 @@ export class HomePage {
         },
         responsive: true,
         scales: {
+          xAxes: [{
+            gridLines: {
+              color: "##7f8c8d",
+            },
+          }],
+
           yAxes: [{
             display: true,
-
+            gridLines: {
+              color: "##7f8c8d",
+            },
             ticks: {
               min: -16,
               max: 16,
@@ -728,7 +757,7 @@ export class HomePage {
     this.dirty = false;
   }
 
-  ionViewDidLoad() {
+  ionViewDidEnter() {
     this.plt.ready().then(() => {
       this.utils.getRemoteVersion()
         .then(ver => {
@@ -737,6 +766,9 @@ export class HomePage {
           console.log(`remote: ${this.remoteVer}, local: ${localver}`);
           let c = this.utils.versionCompare(localver, this.remoteVer);
           if (c == -1) this.isOutdated = true;
+
+          this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Accelerometer');
+          this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
         })
     })
   }

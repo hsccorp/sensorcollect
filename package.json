@@ -57,6 +57,7 @@
         "cordova-plugin-speechrecognition": "^1.1.2",
         "cordova-plugin-splashscreen": "^4.0.3",
         "cordova-plugin-statusbar": "^2.2.2",
+        "cordova-plugin-webviewcolor": "^2.0.0",
         "cordova-plugin-whitelist": "^1.3.1",
         "cordova-plugin-x-socialsharing": "^5.1.8",
         "cordova-sqlite-storage": "^2.0.4",
@@ -100,10 +101,11 @@
             "cordova-sqlite-storage": {},
             "cordova-plugin-inappbrowser": {},
             "cordova-plugin-app-version": {},
+            "cordova-plugin-speechrecognition": {},
+            "cordova-plugin-webviewcolor": {},
             "cordova-plugin-ble-central": {
                 "BLUETOOTH_USAGE_DESCRIPTION": " "
-            },
-            "cordova-plugin-speechrecognition": {}
+            }
         },
         "platforms": [
             "android",

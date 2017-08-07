@@ -1,0 +1,70 @@
+@import "./ionic.globals";
+
+
+
+
+
+// Goofing around with my own Dark Theme
+// ----------------------------------------
+
+$colors: (
+  primary:   (base: #eeae15, contrast:#000),
+  secondary:  (base: #03A9F4, contrast: #000),
+  danger:     #f43e00,
+  light:      (base:#bdc3c7, contrast:#000),
+  dark:       (base:#d35400, contrast:#000),
+
+  alert:      #F39C12,
+  
+) !default;
+
+
+$text-color:                 #DADFE1 !default;
+$link-color:                 color($colors, primary) !default;
+$background-color:           #363232 !default;
+$subdued-text-color:         #666 !default;
+
+$font-family-base:            "Helvetica Neue", "Roboto", sans-serif !default;
+$font-size-base:             1.4rem !default; // 1.4rem == 14px
+
+$content-padding:            16px !default;
+$content-margin:             16px !default;
+
+$content-outer-background: #000;
+
+$toolbar-background:         #434343 !default;
+$toolbar-border-color:       #434343 !default;
+
+$toolbar-active-color:       $link-color !default;
+$toolbar-inactive-color:     #8c8c8c !default;
+
+$tabs-background:            $toolbar-background !default;
+$tabs-border-color:          $toolbar-border-color !default;
+$tabs-tab-color-inactive:    #8c8c8c !default;
+$tabs-tab-color-active:      $link-color !default;
+
+$list-text-color:            $text-color !default;
+$list-background-color:      #242424 !default;
+$list-border-color:          #000 !default;
+$list-header-color:          $text-color !default;
+
+$alert-background: $toolbar-background !default;
+$alert-button-background-color-activated: lighten($alert-background,30%) !default;
+$alert-message-text-color: $text-color !default;
+$alert-input-background-color: #bdc3c7 !default;
+$alert-input-text-color: #242424 !default;
+
+
+
+
+.alert-input {
+  color: $alert-input-text-color;
+  background-color: $alert-input-background-color;
+}
+
+body {
+  //background-color: $background-color;
+  color: $text-color;
+}
+
+@import "./dark.platforms.scss"

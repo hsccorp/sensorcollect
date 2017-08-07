@@ -40,4 +40,4 @@ Compilation
 
 Image credits
 -------------
-* splash screen & icon: https://openclipart.org/detail/4632/carfront
+* splash screen & icon: https://openclipart.org/detail/116785/yellow-convertible-sports-car

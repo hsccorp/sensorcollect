@@ -5,9 +5,9 @@ progress-bar {
         margin: 10px 2%;
         padding: 3px;
         text-align: center;
-        background-color: #f4f4f4;
-        border: 1px solid #dcdcdc;
-        color: #fff;
+        background-color: $toolbar-background;
+        border: 1px solid $toolbar-border-color;
+        color: $text-color;
         border-radius: 20px;
     }
  
@@ -18,7 +18,7 @@ progress-bar {
         padding: 5px;
         border-radius: 20px;
         background-color: #7f8c8d;
-        color:white;
+        color:$text-color;
         font-size:1.1em;
     }
  

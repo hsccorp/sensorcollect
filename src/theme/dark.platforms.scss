@@ -1,0 +1,43 @@
+// platform specific color mappings
+
+
+$loading-background: $toolbar-background !default;
+$loading-text-color: $text-color !default; 
+
+
+$alert-ios-background: $alert-background !default;
+$alert-md-background-color: $alert-background !default;
+$alert-wp-background-color: $alert-background !default;
+
+$alert-ios-message-text-color: $alert-message-text-color !default;
+$alert-md-message-text-color: $alert-message-text-color !default;
+$alert-wp-message-text-color: $alert-message-text-color !default;
+
+$alert-ios-button-background-color-activated: $alert-button-background-color-activated !default;
+$alert-md-button-background-color-activated: $alert-button-background-color-activated !default;
+$alert-wp-button-background-color-activated: $alert-button-background-color-activated !default;
+
+$content-ios-outer-background:$content-outer-background !default;
+$content-md-outer-background:$content-outer-background !default;
+$content-wp-outer-background:$content-outer-background !default;
+
+$list-ios-header-color:  $list-header-color !default;
+$list-md-header-color:  $list-header-color !default;
+$list-wp-header-color:  $list-header-color !default;
+
+$alert-ios-input-background-color: $alert-input-background-color !default;
+$alert-md-input-background-color: $alert-input-background-color !default;
+$alert-wp-input-background-color: $alert-input-background-color !default;
+
+$alert-ios-input-text-color:$alert-input-text-color !default;
+$alert-md-input-text-color:$text-color !default;
+$alert-wp-input-text-color:$alert-input-text-color !default;
+
+
+$loading-ios-background: $loading-background !default;
+$loading-md-background: $loading-background !default;
+$loading-wp-background: $loading-background !default;
+
+$loading-ios-text-color: $loading-text-color !default;
+$loading-md-text-color: $loading-text-color !default;
+$loading-wp-text-color: $loading-text-color !default;
