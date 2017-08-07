@@ -1,6 +1,18 @@
 # Change Log
 
-## [0.0.5](https://github.com/hsccorp/sensorcollect/tree/0.0.5) (2017-08-04)
+## [0.0.6](https://github.com/hsccorp/sensorcollect/tree/0.0.6) (2017-08-07)
+[Full Changelog](https://github.com/hsccorp/sensorcollect/compare/v0.0.5...0.0.6)
+
+**Implemented enhancements:**
+
+- create dark theme [\#13](https://github.com/hsccorp/sensorcollect/issues/13)
+
+**Closed issues:**
+
+- migrate all firebase ops to angular2 lib [\#12](https://github.com/hsccorp/sensorcollect/issues/12)
+- map version check to GitHub release code and schedule it [\#11](https://github.com/hsccorp/sensorcollect/issues/11)
+
+## [v0.0.5](https://github.com/hsccorp/sensorcollect/tree/v0.0.5) (2017-08-04)
 **Implemented enhancements:**
 
 - add speech recognition to make it easier to put markers \(will need cloud access\) [\#9](https://github.com/hsccorp/sensorcollect/issues/9)
