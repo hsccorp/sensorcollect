@@ -18,11 +18,7 @@
       <button ion-button icon-only (click)="viewTrips()"><ion-icon name="list"></ion-icon>
       </button>
     </ion-buttons>
-    <!--<ion-buttons end>
-      <button ion-button icon-only (click)="confirmDelete()">
-            <ion-icon name="trash"></ion-icon>
-         </button>
-    </ion-buttons>-->
+   
   </ion-navbar>
 </ion-header>
 
@@ -74,10 +70,10 @@
   <div>
     <ion-segment [(ngModel)]="viewMode">
       <ion-segment-button value="graph" (ionSelect)="chartClicked()">
-        graph
+        hide raw data
       </ion-segment-button>
       <ion-segment-button value="raw" (ionSelect)="rawClicked()">
-        raw
+        show raw data
       </ion-segment-button>
     </ion-segment>
   </div>
@@ -100,11 +96,10 @@
 
     </div>
 
-    <div *ngSwitchCase="'graph'">
+  
       <canvas #accGraph></canvas>
       <canvas #gyroGraph></canvas>
 
-    </div>
   </div>
 
   <ion-fab bottom right *ngIf="speechAvailable && logState=='Stop'">

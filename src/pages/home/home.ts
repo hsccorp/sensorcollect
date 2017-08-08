@@ -671,6 +671,7 @@ export class HomePage {
 
   chartClicked() {
     this.utils.presentLoader("charting graph..");
+    /*
     this.dirty = true;
     
     setTimeout(() => {
@@ -681,7 +682,7 @@ export class HomePage {
       this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
       ;
       this.utils.removeLoader();
-    }, 500);
+    }, 500);*/
   }
 
   // instantiates charts. Generic function to handle different chart objects
