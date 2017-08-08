@@ -443,7 +443,7 @@ export class HomePage {
         chart.data.datasets[2].data.shift();
         chart.data.labels.shift();
 
-        chart.update(0);
+        chart.update();
       
       }, 100);
 
@@ -689,16 +689,16 @@ export class HomePage {
     console.log("*** Creating Chart");
     let chart;
 
+
      chart = new Chart(elem, {
 
       type: 'line',
       data: {
-        labels: ["", "", "", "", "", "", "", "", "", ""],
+        labels: new Array(20).fill(""),
         datasets: [
           {
             label: 'X',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            //backgroundColor: 'rgb(255,0,0)',
+            data: new Array(20).fill(0),
             borderColor: '#ad2719',
             backgroundColor: 'rgba(231, 76, 60,0.4)',
             borderWidth: 2,
@@ -706,8 +706,7 @@ export class HomePage {
           },
           {
             label: 'Y',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            //backgroundColor: 'rgb(255,0,0)',
+            data: new Array(20).fill(0),
             borderColor: '#148744',
             backgroundColor: 'rgba(39, 174, 96,0.4)',
             borderWidth: 2,
@@ -716,8 +715,7 @@ export class HomePage {
 
           {
             label: 'Z',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            //backgroundColor: 'rgb(255,0,0)',
+            data: new Array(20).fill(0),
             borderColor: 'rgba(142, 68, 173,1.0)',
             backgroundColor: 'rgba(155, 89, 182,0.3)',
             borderWidth: 2,
@@ -733,8 +731,8 @@ export class HomePage {
         responsive: true,
         
       animation: {
-        duration: 300,
-        easing: 'easeInOutQuart'
+        duration: 100,
+        easing: 'linear'
       },
       
         scales: {
