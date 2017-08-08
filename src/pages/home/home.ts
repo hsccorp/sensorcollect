@@ -670,7 +670,7 @@ export class HomePage {
   // we need to redraw/reattach charts
 
   chartClicked() {
-    this.utils.presentLoader("charting graph..");
+    //this.utils.presentLoader("charting graph..");
     /*
     this.dirty = true;
     
