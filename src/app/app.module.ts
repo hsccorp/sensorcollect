@@ -31,6 +31,7 @@ import {BlePage} from "../pages/ble/ble";
 import { SpeechRecognition } from '@ionic-native/speech-recognition';
 import { DatabaseProvider } from '../providers/database/database';
 import { ReversePipe } from '../pipes/reverse/reverse';
+import { SensorsProvider } from '../providers/sensors/sensors';
 
 
 
@@ -88,7 +89,8 @@ import { ReversePipe } from '../pipes/reverse/reverse';
     BLE,
     SpeechRecognition,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    DatabaseProvider
+    DatabaseProvider,
+    SensorsProvider
   ]
 })
 export class AppModule {}

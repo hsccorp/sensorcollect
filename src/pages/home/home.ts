@@ -1,13 +1,12 @@
 import { Component, ViewChild } from '@angular/core';
 import { NavController, ModalController, Platform } from 'ionic-angular';
-import { DeviceMotion, DeviceMotionAccelerationData } from '@ionic-native/device-motion';
-import { Gyroscope, GyroscopeOrientation } from '@ionic-native/gyroscope';
-import { Geolocation } from '@ionic-native/geolocation';
+
 import { SocialSharing } from '@ionic-native/social-sharing';
 import { Chart } from 'chart.js';
-import { AndroidPermissions } from '@ionic-native/android-permissions';
+
 import { Insomnia } from '@ionic-native/insomnia';
 import { CommonUtilsProvider } from '../../providers/common-utils/common-utils';
+import { SensorsProvider } from '../../providers/sensors/sensors';
 import { DatabaseProvider } from '../../providers/database/database';
 import { AlertController } from 'ionic-angular';
 import { ViewTripsPage } from "../view-trips/view-trips";
@@ -15,6 +14,7 @@ import { AlertModalPage } from "../alert-modal/alert-modal";
 import { BlePage } from "../ble/ble";
 import { SpeechRecognition, SpeechRecognitionListeningOptionsAndroid, SpeechRecognitionListeningOptionsIOS } from '@ionic-native/speech-recognition';
 import { NgZone } from '@angular/core';
+import { AndroidPermissions } from '@ionic-native/android-permissions';
 
 import * as Fuse from 'fuse.js';
 
@@ -26,11 +26,7 @@ import * as Fuse from 'fuse.js';
 
 
 export class HomePage {
-  // will hold subscriptions to sensors
-  gpsSub: any = null;
-  accSub: any = null;
-  gyrSub: any = null;
-
+ 
   // modify these to make your own markers
   // name = what is displayed as a button
   // val = what is written in the log
@@ -66,6 +62,8 @@ export class HomePage {
     gyroChart: any,
   } = { accChart: null, gyroChart: null };
 
+  
+
   progress: { val: number } = { val: -1 }; // upload indication
 
   acc: any;  // latest accelerometer data
@@ -76,7 +74,6 @@ export class HomePage {
   stateColor: string = 'primary'; // button color
   logs: any[] = []; // will hold history of acc + gyr data
   logRows: number = 0;
-  freq: number = 500; // sampling freq for gps/gyr
   viewMode: string = 'graph'; // controls segment display
   dirty: boolean = true; // hack for graph DOM attachment
   mLastAcc: number = 0; // not used, really
@@ -100,7 +97,7 @@ export class HomePage {
   iosOptions: SpeechRecognitionListeningOptionsIOS;
 
   // init
-  constructor(public navCtrl: NavController, public deviceMotion: DeviceMotion, public plt: Platform, public gyroscope: Gyroscope, public socialSharing: SocialSharing, public insomnia: Insomnia, private geo: Geolocation, public perm: AndroidPermissions, public utils: CommonUtilsProvider, public alert: AlertController, public modal: ModalController, public speech: SpeechRecognition, public db: DatabaseProvider, public zone: NgZone) {
+  constructor(public navCtrl: NavController,  public plt: Platform,  public socialSharing: SocialSharing, public insomnia: Insomnia,   public utils: CommonUtilsProvider, public alert: AlertController, public modal: ModalController, public speech: SpeechRecognition, public db: DatabaseProvider, public zone: NgZone, public perm: AndroidPermissions, public sensors:SensorsProvider) {
     //, 
 
     plt.ready().then(() => {
@@ -251,64 +248,6 @@ export class HomePage {
       })
   }
 
-  // unsubscribe from all sensors once trip ends
-  stopAllSensors() {
-    try {
-      this.accSub.unsubscribe();
-      this.gyrSub.unsubscribe();
-      navigator.geolocation.clearWatch(this.gpsSub); // not sure why this is needed
-      this.gpsSub.unsubscribe();
-    }
-    catch (e) {
-      console.log("stop sensor error: " + e);
-    }
-
-  }
-
-  // start listening to sensors when trip starts
-  startAllSensors() {
-    // listen to acc. data
-    this.accSub = this.deviceMotion.watchAcceleration({ frequency: this.freq }).subscribe((acceleration: DeviceMotionAccelerationData) => {
-
-      this.zone.run(() => { this.process(acceleration, this.charts.accChart, 'acc'); });
-
-    });
-
-    // listen to gyro data
-    this.gyrSub = this.gyroscope.watch({ frequency: this.freq })
-      .subscribe((gyroscope: GyroscopeOrientation) => {
-        //console.log("Gyro:" + JSON.stringify(gyroscope));
-        this.zone.run(() => { this.process(gyroscope, this.charts.gyroChart, 'gyro'); });
-
-
-      });
-
-    this.perm.checkPermission(this.perm.PERMISSION.ACCESS_FINE_LOCATION).then(
-      success => { this.latchGPS(); }, err => { this.utils.presentToast("Error latching to GPS", "error"); });
-  }
-
-  // attaches to the GPS and logs readings, for speeds
-  latchGPS() {
-    console.log(">>>>GPS Latching...");
-    this.gpsSub = this.geo.watchPosition({ enableHighAccuracy: true })
-      .subscribe((data) => {
-        //console.log("GPS:" + JSON.stringify(data));
-        if (data.coords) {
-          // this is meters per sec, convert to mph
-          this.speed = data.coords.speed * 2.23694;
-          if (this.isLogging()) {
-            if (!this.logCoords) {
-              data.coords.latitude = 0;
-              data.coords.longitude = 0;
-              data.coords.altitude = 0;
-
-            }
-            this.storeLog('gps', data.coords);
-          }
-        }
-      });
-  }
-
   // called by start/stop trip
   toggleButtonState() {
     this.logState = (this.logState == 'Start') ? 'Stop' : 'Start';
@@ -319,6 +258,37 @@ export class HomePage {
   togglePause() {
     this.pause = !this.pause;
     this.pauseColor = (this.pauseColor == 'secondary') ? 'primary' : 'secondary';
+  }
+
+
+// callback handlers for subscription data
+ accDataReceived(data) {
+    console.log ("acc data:"+JSON.stringify(data));
+    this.processCharts(data, this.charts.accChart, 'acc');
+  
+  }
+
+    gyroDataReceived(data) {
+    console.log ("gyr data:"+JSON.stringify(data));
+    this.processCharts(data, this.charts.gyroChart, 'gyro');
+
+  }
+
+  gpsDataReceived(data) {
+      console.log ("GPS"+JSON.stringify(data));
+         if (data.coords) {
+          // this is meters per sec, convert to mph
+          this.speed = data.coords.speed * 2.23694;
+          if (this.isLogging()) {
+            if (!this.logCoords) { // mask lat/long
+              data.coords.latitude = 0;
+              data.coords.longitude = 0;
+              data.coords.altitude = 0;
+
+            } 
+            this.storeLog('gps', data.coords);
+          }
+        }
   }
 
   // init code to start a trip
@@ -340,20 +310,18 @@ export class HomePage {
             this.startTripHeader(this.currentTripName);
             this.toggleButtonState();
             this.utils.presentToast("trip recording started");
-            this.startAllSensors();
+            this.sensors.startAndStreamSensors(this.accDataReceived.bind(this), this.gyroDataReceived.bind(this), this.gpsDataReceived.bind(this))
             this.utils.startTimer(this.timer);
             // make sure screen stays awake
             this.insomnia.keepAwake()
-              .then((succ) => { console.log("*** POWER OK **") })
+              .then((succ) => { console.log("Wakelock acqusition OK") })
               .catch((err) => { this.utils.presentToast("could not grab wakelock, screen will dim", "error"); });
           })
           .catch(err => { this.utils.presentToast('problem removing log file', 'error'); })
-
       }
 
     })
     im.present();
-
   }
 
   // aborts a trip without saving 
@@ -362,7 +330,7 @@ export class HomePage {
 
     this.utils.stopTimer(this.timer);
     this.toggleButtonState();
-    this.stopAllSensors();
+    this.sensors.stopAllSensors();
     this.insomnia.allowSleepAgain()
       .then((succ) => { console.log("*** WAKE LOCK RELEASED OK **") })
       .catch((err) => { console.log("Error, releasing wake lock:" + err) });
@@ -377,7 +345,7 @@ export class HomePage {
   stopTrip() {
     console.log("Inside stop trip");
     this.utils.stopTimer(this.timer);
-    this.stopAllSensors();
+    this.sensors.stopAllSensors();
     // make sure screen stays awake
     this.insomnia.allowSleepAgain()
       .then((succ) => { console.log("*** WAKE LOCK RELEASED OK **") })
@@ -426,13 +394,15 @@ export class HomePage {
   }
 
   // given a sensor object, updates graph and log 
-  process(object, chart, type) {
+   processCharts = function (object, chart, type): Promise <boolean> {
+    console.log ("--- process start ---");
+    return new Promise ((resolve,reject) => {
+    console.log ("Inside process with "+ JSON.stringify(object))
     if (!this.dirty) { // let's make sure there is no race when chart is re-creating
       
       // I don't think zone.run will work here
       // we need time for the view to render first?
       setTimeout(() => {
-        
         chart.data.datasets[0].data.push(object.x);
         chart.data.datasets[1].data.push(object.y);
         chart.data.datasets[2].data.push(object.z);
@@ -442,13 +412,9 @@ export class HomePage {
         chart.data.datasets[1].data.shift();
         chart.data.datasets[2].data.shift();
         chart.data.labels.shift();
-
         chart.update();
       
       }, 100);
-
-      
-
     }
     else {
       console.log("dirty");
@@ -456,6 +422,7 @@ export class HomePage {
 
     if (type == 'acc') // accelerometer
     {
+
       this.acc = JSON.stringify(object);
       this.mLastAcc = this.mCurrAcc;
       this.mCurrAcc = Math.sqrt(object.x * object.x + object.y * object.y + object.z * object.z);
@@ -493,8 +460,12 @@ export class HomePage {
 
       if (this.isLogging()) { this.storeLog(type, object); }
     }
+    resolve (true);
+
+    });
 
   }
+
 
   // this adds 'events' to the log. Use it for analysis - before you perform an action
   // you want to train, set an appropriate marker
