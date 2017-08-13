@@ -7,6 +7,7 @@ import { Geolocation, Geoposition } from '@ionic-native/geolocation';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { Observable } from 'rxjs/Observable';
 
+
 // Service to start/listen/unsubscribe sensors
 
 @Injectable()
@@ -40,7 +41,6 @@ export class SensorsProvider {
 
   // start listening to sensors when trip starts
   startAndStreamSensors(accCallback: Function, gyrCallback: Function, gpsCallback: Function) {
-
     this.accSub = this.deviceMotion.watchAcceleration({ frequency: this.freq })
       .subscribe(data => {
         accCallback(data);

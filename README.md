@@ -41,3 +41,4 @@ Compilation
 Image credits
 -------------
 * splash screen & icon: https://openclipart.org/detail/116785/yellow-convertible-sports-car
+* Dark theme - https://github.com/pliablepixels/ionic-dark-grey-theme

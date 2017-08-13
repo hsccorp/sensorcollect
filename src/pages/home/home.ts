@@ -214,10 +214,10 @@ export class HomePage {
   }
 
   // hidden for now from ui
-  /*ble() {
+  ble() {
     console.log("View BLE");
     this.navCtrl.push(BlePage);
-  }*/
+  }
 
 
   // this is called for a pending trip that was not uploaded to the cloud
