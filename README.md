@@ -25,7 +25,7 @@ Usage
 
 Cloud Database
 ---------------
-* At the end of the trip, the app will automatically try to uplaod the trip to a preconfigured Firebase DB, for which you need credentails, which you don't have unless you are an HSC employee. That is intentional. You can either modify the code to use your own DB (see below), or, just hit cancel when you are prompted for a password, in which case the trip never gets uploaded. You can still download/share it locally using the "Share" button
+* At the end of the trip, the app will automatically try to upload the trip to a preconfigured Firebase DB, for which you need credentails, which you don't have unless you are an HSC employee. That is intentional. You can either modify the code to use your own DB (see below), or, just hit cancel when you are prompted for a password, in which case the trip never gets uploaded. You can still download/share it locally using the "Share" button
 * The app currently uses a pre-configured password protected Firebase DB + Storage bucket to upload trips
 * If you are modifying the app for your own needs, you'll want to use your own Database. Its easiest if you just set up your own Firebase instance (its free). Modify [these lines of code](https://github.com/hsccorp/sensorcollect/blob/master/src/app/app.module.ts#L38-L46) to use your own
 
