@@ -23,6 +23,11 @@ Usage
 * Tap on the "list" icon on top right of navbar to view uploaded trips, slide to share/delete
 * "Share" lets you share the latest trip file with others 
 
+Cloud Database
+---------------
+* The app currently uses a pre-configured password protected Firebase DB + Storage bucket to upload trips
+* If you are modifying the app for your own needs, you'll want to use your own Database. Its easiest if you just set up your own Firebase instance (its free). Modify [these lines of code](https://github.com/hsccorp/sensorcollect/blob/master/src/app/app.module.ts#L38-L46) to use your own
+
 Screenshots
 ------------
 <img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/1.PNG" height="600px" /><img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/2.PNG" height="600px" /><img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/3.PNG" height="600px" /><img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/4.PNG" height="600px" />
