@@ -31,7 +31,7 @@ Cloud Database
 
 Screenshots
 ------------
-<img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/1.PNG" height="600px" /><img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/2.PNG" height="600px" /><img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/3.PNG" height="600px" /><img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/4.PNG" height="600px" />
+<img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/1.PNG" height="600px" /> <img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/2.PNG" height="600px" /> <img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/3.PNG" height="600px" /> <img src="https://github.com/hsccorp/sensorcollect/raw/master/screenshots/4.PNG" height="600px" />
 
 Compilation
 -----------
