@@ -1,7 +1,23 @@
 # Change Log
 
-## [0.0.6](https://github.com/hsccorp/sensorcollect/tree/0.0.6) (2017-08-07)
-[Full Changelog](https://github.com/hsccorp/sensorcollect/compare/v0.0.5...0.0.6)
+## [0.0.7](https://github.com/hsccorp/sensorcollect/tree/0.0.7) (2017-08-23)
+[Full Changelog](https://github.com/hsccorp/sensorcollect/compare/v0.0.6...0.0.7)
+
+**Implemented enhancements:**
+
+- also add relative x/y/z logs for gyr/acc [\#16](https://github.com/hsccorp/sensorcollect/issues/16)
+
+**Fixed bugs:**
+
+- chartjs issues with dynamic DOM [\#14](https://github.com/hsccorp/sensorcollect/issues/14)
+
+**Closed issues:**
+
+- move sensor code to a new service [\#15](https://github.com/hsccorp/sensorcollect/issues/15)
+- simplify data format and make valid JSON [\#3](https://github.com/hsccorp/sensorcollect/issues/3)
+
+## [v0.0.6](https://github.com/hsccorp/sensorcollect/tree/v0.0.6) (2017-08-07)
+[Full Changelog](https://github.com/hsccorp/sensorcollect/compare/v0.0.5...v0.0.6)
 
 **Implemented enhancements:**
 
