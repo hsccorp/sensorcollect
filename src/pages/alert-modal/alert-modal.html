@@ -8,7 +8,11 @@
   <ion-item>
     <ion-label>Track GPS lat/long</ion-label>
     <ion-checkbox [(ngModel)]="inputData.xy" ></ion-checkbox>
-    
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Also log relative x/y/z</ion-label>
+    <ion-checkbox [(ngModel)]="inputData.isRelative" ></ion-checkbox>
   </ion-item>
 
   <!--<ion-item>

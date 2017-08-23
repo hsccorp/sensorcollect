@@ -9,7 +9,7 @@ import { NavController, NavParams, ViewController } from 'ionic-angular';
   templateUrl: 'alert-modal.html',
 })
 export class AlertModalPage {
-  inputData = {xy:true, name:"", obd:true, isCancelled:false};
+  inputData = {xy:true, name:"", obd:true, isRelative:true, isCancelled:false};
   constructor(public navCtrl: NavController, public navParams: NavParams, public viewCtrl:ViewController) {
     console.log ("*** Modal constructor");
   }

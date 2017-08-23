@@ -62,9 +62,17 @@ export class HomePage {
     gyroChart: any,
   } = { accChart: null, gyroChart: null };
 
-  
 
   progress: { val: number } = { val: -1 }; // upload indication
+
+  // used for relative measurements
+  isRelative: false;
+  oldSensorVals: { 
+    acc: {x:number, y:number, z:number},
+    gyr: {x:number, y:number, z:number},
+
+};
+
 
   acc: any;  // latest accelerometer data
   gyro: any; // latest gyro data
@@ -263,19 +271,43 @@ export class HomePage {
 
 // callback handlers for subscription data
  accDataReceived(data) {
-    console.log ("acc data:"+JSON.stringify(data));
+   // console.log ("acc data:"+JSON.stringify(data));
+
+    if (this.isRelative){
+
+      //console.log ("Relative comp");
+
+      data.relX =data.x - this.oldSensorVals.acc.x;
+      data.relY =data.y - this.oldSensorVals.acc.y;
+      data.relZ  =data.z  - this.oldSensorVals.acc.z;
+
+      this.oldSensorVals.acc.x = data.x;
+      this.oldSensorVals.acc.y = data.y;
+      this.oldSensorVals.acc.z = data.z;
+    }
+
     this.processCharts(data, this.charts.accChart, 'acc');
   
   }
 
     gyroDataReceived(data) {
-    console.log ("gyr data:"+JSON.stringify(data));
+   // console.log ("gyr data:"+JSON.stringify(data));
+
+    if (this.isRelative){
+            data.relX =data.x - this.oldSensorVals.gyr.x;
+            data.relY =data.y - this.oldSensorVals.gyr.y;
+            data.relZ  =data.z  - this.oldSensorVals.gyr.z;
+      
+            this.oldSensorVals.gyr.x = data.x;
+            this.oldSensorVals.gyr.y = data.y;
+            this.oldSensorVals.gyr.z = data.z;
+          }
     this.processCharts(data, this.charts.gyroChart, 'gyro');
 
   }
 
   gpsDataReceived(data) {
-      console.log ("GPS"+JSON.stringify(data));
+     // console.log ("GPS"+JSON.stringify(data));
          if (data.coords) {
           // this is meters per sec, convert to mph
           this.speed = data.coords.speed * 2.23694;
@@ -296,11 +328,20 @@ export class HomePage {
     this.pause = false;
     this.pauseColor = 'secondary';
     this.moveCount = 0;
+    this.isRelative = false;
 
+    this.oldSensorVals = {
+      acc: {x:0, y:0, z:0},
+      gyr: {x:0, y:0, z:0},
+
+    };
+    
     let im = this.modal.create(AlertModalPage, {}, { cssClass: "alertModal", enableBackdropDismiss: false });
     im.onDidDismiss(data => {
       console.log("RETURNED: " + JSON.stringify(data));
+
       if (data.isCancelled == false) {
+        this.isRelative = data.isRelative;
         this.logCoords = data.xy;
         this.clearArray(); // remove array
         this.db.deleteLog() // remove log file
@@ -395,9 +436,9 @@ export class HomePage {
 
   // given a sensor object, updates graph and log 
    processCharts = function (object, chart, type): Promise <boolean> {
-    console.log ("--- process start ---");
+    //console.log ("--- process start ---");
     return new Promise ((resolve,reject) => {
-    console.log ("Inside process with "+ JSON.stringify(object))
+    //console.log ("Inside process with "+ JSON.stringify(object))
     if (!this.dirty) { // let's make sure there is no race when chart is re-creating
       
       // I don't think zone.run will work here
@@ -572,6 +613,7 @@ export class HomePage {
             {
               text: 'Ok',
               handler: () => {
+                console.log ("Resolving true");
                 resolve(true);
 
               }
@@ -598,7 +640,7 @@ export class HomePage {
     if (this.logState == 'Start') {
       this.checkPendingUpload()
         .then(succ => this.startTrip())
-        .catch(_ => console.log("Not starting a trip"))
+        .catch(err => console.log("Not starting a trip "+ JSON.stringify(err)))
     }
   }
 
