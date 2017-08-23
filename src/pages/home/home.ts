@@ -352,7 +352,7 @@ export class HomePage {
       .catch((err) => { console.log("Error, releasing wake lock:" + err) });
 
     try {
-      this.flushLog().then(_ => {
+      this.flushLog(true).then(_ => {
         let str = "]}\n";
         console.log("STOPPING TRIP, writing " + str);
         this.db.writeString(str);
@@ -540,9 +540,9 @@ export class HomePage {
   }
 
 
-  flushLog() {
+  flushLog(removeLastComma = false) {
     console.log(">>>>>>>Flushing logs...");
-    return this.db.writeLog(this.logs);
+    return this.db.writeLog(this.logs, removeLastComma);
   }
 
 
