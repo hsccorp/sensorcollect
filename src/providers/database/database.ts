@@ -54,12 +54,17 @@ export class DatabaseProvider {
   }
 
   // dump a fragment of logs to a file 
-  writeLog(logs_object) {
+  writeLog(logs_object, removeLastComma=false) {
     // don't JSON stringify full array as these are chunks
     let str = "";
-    for (let i = 0; i < logs_object.length; i++) {
+    for (let i = 0; i < logs_object.length-1; i++) {
       str = str + "              " + JSON.stringify(logs_object[i]) + "," + "\n";
     }
+    str = str + "              " + JSON.stringify([logs_object[logs_object.length-1]]);
+    if (!removeLastComma) str = str + ",";
+    str = str + "\n";
+
+
     return this.file.writeFile(this.file.dataDirectory, this.logFile, str, { replace: false, append: true });
 
   }
