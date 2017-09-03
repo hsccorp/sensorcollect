@@ -66,7 +66,7 @@ export class HomePage {
   progress: { val: number } = { val: -1 }; // upload indication
 
   // used for relative measurements
-  isRelative: false;
+  //isRelative: false;
   oldSensorVals: { 
     acc: {x:number, y:number, z:number},
     gyr: {x:number, y:number, z:number},
@@ -273,7 +273,7 @@ export class HomePage {
  accDataReceived(data) {
    // console.log ("acc data:"+JSON.stringify(data));
 
-    if (this.isRelative){
+    /*if (this.isRelative){
 
       //console.log ("Relative comp");
 
@@ -284,7 +284,7 @@ export class HomePage {
       this.oldSensorVals.acc.x = data.x;
       this.oldSensorVals.acc.y = data.y;
       this.oldSensorVals.acc.z = data.z;
-    }
+    }*/
 
     this.processCharts(data, this.charts.accChart, 'acc');
   
@@ -293,7 +293,7 @@ export class HomePage {
     gyroDataReceived(data) {
    // console.log ("gyr data:"+JSON.stringify(data));
 
-    if (this.isRelative){
+    /*if (this.isRelative){
             data.relX =data.x - this.oldSensorVals.gyr.x;
             data.relY =data.y - this.oldSensorVals.gyr.y;
             data.relZ  =data.z  - this.oldSensorVals.gyr.z;
@@ -301,7 +301,7 @@ export class HomePage {
             this.oldSensorVals.gyr.x = data.x;
             this.oldSensorVals.gyr.y = data.y;
             this.oldSensorVals.gyr.z = data.z;
-          }
+          }*/
     this.processCharts(data, this.charts.gyroChart, 'gyro');
 
   }
@@ -328,7 +328,7 @@ export class HomePage {
     this.pause = false;
     this.pauseColor = 'secondary';
     this.moveCount = 0;
-    this.isRelative = false;
+    //this.isRelative = false;
 
     this.oldSensorVals = {
       acc: {x:0, y:0, z:0},
@@ -341,7 +341,7 @@ export class HomePage {
       console.log("RETURNED: " + JSON.stringify(data));
 
       if (data.isCancelled == false) {
-        this.isRelative = data.isRelative;
+        //this.isRelative = data.isRelative;
         this.logCoords = data.xy;
         this.clearArray(); // remove array
         this.db.deleteLog() // remove log file
