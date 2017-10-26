@@ -18,6 +18,7 @@ import { AndroidPermissions } from '@ionic-native/android-permissions';
 
 import * as Fuse from 'fuse.js';
 
+
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
@@ -108,7 +109,7 @@ export class HomePage {
   constructor(public navCtrl: NavController,  public plt: Platform,  public socialSharing: SocialSharing, public insomnia: Insomnia,   public utils: CommonUtilsProvider, public alert: AlertController, public modal: ModalController, public speech: SpeechRecognition, public db: DatabaseProvider, public zone: NgZone, public perm: AndroidPermissions, public sensors:SensorsProvider) {
     //, 
 
-    plt.ready().then(() => {
+    this.plt.ready().then(() => {
       if (this.plt.is('ios')) {
         console.log (">>>>>>>>>>>>>> HACKING BACKGROUND COLOR");
          window['plugins'].webviewcolor.change('#000');
@@ -358,7 +359,9 @@ export class HomePage {
               .then((succ) => { console.log("Wakelock acqusition OK") })
               .catch((err) => { this.utils.presentToast("could not grab wakelock, screen will dim", "error"); });
           })
-          .catch(err => { this.utils.presentToast('problem removing log file', 'error'); })
+          .catch(err => { 
+            console.log (JSON.stringify(err));
+            this.utils.presentToast('problem removing log file', 'error'); })
       }
 
     })
@@ -699,7 +702,7 @@ export class HomePage {
   }
 
   // instantiates charts. Generic function to handle different chart objects
-  createChart(charthandle, elem, type, title = '') {
+  createChart(charthandle, elem, type, title = '', options) {
     console.log("*** Creating Chart");
     let chart;
 
@@ -711,7 +714,7 @@ export class HomePage {
         labels: new Array(20).fill(""),
         datasets: [
           {
-            label: 'X',
+            label: options.xLabel || 'X',
             data: new Array(20).fill(0),
             borderColor: '#ad2719',
             backgroundColor: 'rgba(231, 76, 60,0.4)',
@@ -719,7 +722,7 @@ export class HomePage {
             fill: true,
           },
           {
-            label: 'Y',
+            label: options.yLabel || 'Y',
             data: new Array(20).fill(0),
             borderColor: '#148744',
             backgroundColor: 'rgba(39, 174, 96,0.4)',
@@ -728,7 +731,7 @@ export class HomePage {
           },
 
           {
-            label: 'Z',
+            label: options.zLabel || 'Z',
             data: new Array(20).fill(0),
             borderColor: 'rgba(142, 68, 173,1.0)',
             backgroundColor: 'rgba(155, 89, 182,0.3)',
@@ -762,9 +765,8 @@ export class HomePage {
               color: "##7f8c8d",
             },
             ticks: {
-              min: -16,
-              max: 16,
-
+              min:options.min, 
+              max:options.max
             }
           }]
         }
@@ -789,8 +791,8 @@ export class HomePage {
           let c = this.utils.versionCompare(localver, this.remoteVer);
           if (c == -1) this.isOutdated = true;
 
-          this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Accelerometer');
-          this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Gyroscope');
+          this.createChart(this.charts, this.accCanvas.nativeElement, 'acc', 'Acceleration Magnitude', {min:-20, max:20, xLabel:'acceleration', yLabel:'', zLabel:'' });
+          this.createChart(this.charts, this.gyroCanvas.nativeElement, 'gyro', 'Rotation', {min:-360, max:360, zLabel:'alpha', xLabel:'beta', yLabel:'gamma'});
         })
     })
   }
